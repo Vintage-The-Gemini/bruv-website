@@ -51,26 +51,26 @@ const Contact = () => {
     {
       icon: Mail,
       title: "Email Us",
-      details: ["hello@bruv.com", "support@bruv.com"],
+      details: ["hello@bruv.co.ke", "support@bruv.co.ke"],
       action: "Send us an email anytime"
     },
     {
       icon: Phone,
       title: "Call Us",
-      details: ["+1 (555) 123-4567", "+1 (555) 987-6543"],
-      action: "Available Mon-Fri, 9AM-6PM EST"
+      details: ["+254 701 234 567", "+254 722 345 678"],
+      action: "Available Mon-Fri, 8AM-6PM EAT"
     },
     {
       icon: MapPin,
       title: "Visit Us",
-      details: ["123 Business Avenue", "New York, NY 10001"],
+      details: ["Jumia place, kilimani, Nairobi"],
       action: "Schedule an appointment"
     },
     {
       icon: Clock,
       title: "Business Hours",
-      details: ["Monday - Friday: 9:00 AM - 6:00 PM", "Weekend: By appointment"],
-      action: "Eastern Standard Time"
+      details: ["Monday - Friday: 8:00 AM - 6:00 PM", "Saturday: 9:00 AM - 1:00 PM"],
+      action: "East Africa Time (EAT)"
     }
   ];
 
@@ -85,26 +85,15 @@ const Contact = () => {
     "Other"
   ];
 
-  const offices = [
-    {
-      city: "New York",
-      address: "123 Business Avenue, NY 10001",
-      phone: "+1 (555) 123-4567",
-      email: "ny@bruv.com"
-    },
-    {
-      city: "London", 
-      address: "456 Corporate Street, London EC1A 1BB",
-      phone: "+44 20 7123 4567",
-      email: "london@bruv.com"
-    },
-    {
-      city: "Singapore",
-      address: "789 Marina Bay, Singapore 018956", 
-      phone: "+65 6123 4567",
-      email: "singapore@bruv.com"
-    }
-  ];
+  // Single Kenyan office
+  const office = {
+    city: "Nairobi",
+    address: "Jumuia place,Kilimani, Nairobi 00100",
+    phone: "+254 701 234 567",
+    email: "nairobi@bruv.co.ke",
+    county: "Nairobi County",
+    country: "Kenya"
+  };
 
   if (isSubmitted) {
     return (
@@ -118,7 +107,7 @@ const Contact = () => {
           <h2 className={`text-2xl font-bold mb-4 ${
             isDarkMode ? 'text-white' : 'text-gray-900'
           }`}>
-            Thank You!
+            Asante Sana!
           </h2>
           <p className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>
             Your message has been sent successfully. We'll get back to you within 24 hours.
@@ -272,6 +261,7 @@ const Contact = () => {
                         name="phone"
                         value={formData.phone}
                         onChange={handleChange}
+                        placeholder="+254 7XX XXX XXX"
                         className={`w-full px-4 py-3 border rounded-lg transition-colors duration-200 ${
                           isDarkMode 
                             ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-red-500 focus:ring-red-500/20' 
@@ -375,44 +365,38 @@ const Contact = () => {
               </div>
             </div>
 
-            {/* Office Locations */}
+            {/* Office Location */}
             <div>
               <h2 className={`text-2xl font-bold mb-6 ${
                 isDarkMode ? 'text-white' : 'text-gray-900'
               }`}>
-                Our Offices
+                Our Office
               </h2>
               
-              <div className="space-y-6">
-                {offices.map((office, index) => (
-                  <div 
-                    key={index}
-                    className={`p-6 rounded-xl ${
-                      isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-100'
-                    } border`}
-                  >
-                    <h3 className={`font-semibold mb-3 ${
-                      isDarkMode ? 'text-white' : 'text-gray-900'
-                    }`}>
-                      {office.city}
-                    </h3>
-                    <div className={`space-y-2 text-sm ${
-                      isDarkMode ? 'text-gray-400' : 'text-gray-600'
-                    }`}>
-                      <p>{office.address}</p>
-                      <p>{office.phone}</p>
-                      <p>{office.email}</p>
-                    </div>
-                  </div>
-                ))}
+              <div className={`p-6 rounded-xl ${
+                isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-100'
+              } border mb-8`}>
+                <h3 className={`font-semibold mb-3 ${
+                  isDarkMode ? 'text-white' : 'text-gray-900'
+                }`}>
+                  {office.city} Headquarters
+                </h3>
+                <div className={`space-y-2 text-sm ${
+                  isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                }`}>
+                  <p>{office.address}</p>
+                  <p>{office.county}, {office.country}</p>
+                  <p>{office.phone}</p>
+                  <p>{office.email}</p>
+                </div>
               </div>
 
-              {/* FAQ Section */}
+              {/* Quick Info Section */}
               <div className="mt-8">
                 <h3 className={`text-lg font-semibold mb-4 ${
                   isDarkMode ? 'text-white' : 'text-gray-900'
                 }`}>
-                  Quick Questions?
+                  Quick Information
                 </h3>
                 <div className={`p-4 rounded-lg ${
                   isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-100'
@@ -422,10 +406,35 @@ const Contact = () => {
                   }`}>
                     <strong>Response Time:</strong> We typically respond within 2-4 business hours.
                   </p>
+                  <p className={`text-sm mb-2 ${
+                    isDarkMode ? 'text-gray-300' : 'text-gray-700'
+                  }`}>
+                    <strong>Languages:</strong> English, Kiswahili
+                  </p>
                   <p className={`text-sm ${
                     isDarkMode ? 'text-gray-300' : 'text-gray-700'
                   }`}>
-                    <strong>Emergency Support:</strong> Call +1 (555) 911-BRUV for urgent issues.
+                    <strong>Emergency Support:</strong> Call +254 701 234 567 for urgent issues.
+                  </p>
+                </div>
+              </div>
+
+              {/* Local Information */}
+              <div className="mt-8">
+                <h3 className={`text-lg font-semibold mb-4 ${
+                  isDarkMode ? 'text-white' : 'text-gray-900'
+                }`}>
+                  Local Expertise
+                </h3>
+                <div className={`p-4 rounded-lg ${
+                  isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-100'
+                } border`}>
+                  <p className={`text-sm ${
+                    isDarkMode ? 'text-gray-300' : 'text-gray-700'
+                  }`}>
+                    We understand the Kenyan business environment and regulatory landscape. 
+                    Our solutions are tailored to meet local compliance requirements while 
+                    maintaining international standards.
                   </p>
                 </div>
               </div>

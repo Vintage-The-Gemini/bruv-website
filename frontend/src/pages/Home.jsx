@@ -1,5 +1,5 @@
 // FILE PATH: src/pages/Home.jsx
-// Enhanced Home Page with Parallax and Polymorphism
+// Enhanced Home Page with Parallax and Polymorphism - Contact Section Removed
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
@@ -7,7 +7,6 @@ import Hero from '../components/sections/Hero';
 import Services from '../components/sections/Services';
 import Products from '../components/sections/Products';
 import About from '../components/sections/About';
-import Contact from '../components/sections/Contact';
 import { 
   ChevronDown, 
   Sparkles, 
@@ -155,7 +154,7 @@ const PolymorphicSection = ({
 // Interactive Navigation Dots
 const NavigationDots = () => {
   const [activeSection, setActiveSection] = useState(0);
-  const sections = ['hero', 'services', 'products', 'about', 'contact'];
+  const sections = ['hero', 'services', 'products', 'about']; // Removed 'contact'
 
   useEffect(() => {
     const handleScroll = () => {
@@ -311,25 +310,6 @@ const Home = () => {
         <div id="services">
           <Services />
         </div>
-        
-        {/* Stats Section */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            {[
-              { value: 500, suffix: "+", label: "Happy Clients" },
-              { value: 98, suffix: "%", label: "Success Rate" },
-              { value: 50, suffix: "+", label: "Countries" },
-              { value: 24, suffix: "/7", label: "Support" }
-            ].map((stat, index) => (
-              <div key={index} className="group">
-                <div className="transform group-hover:scale-110 transition-transform duration-300">
-                  <StatsCounter end={stat.value} suffix={stat.suffix} />
-                  <p className="text-gray-600 dark:text-gray-400 mt-2">{stat.label}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
       </PolymorphicSection>
 
       {/* Products with Floating Effect */}
@@ -343,13 +323,6 @@ const Home = () => {
       <PolymorphicSection variant="neon" parallaxSpeed={0.5} className="py-8">
         <div id="about">
           <About />
-        </div>
-      </PolymorphicSection>
-
-      {/* Contact with Default Enhanced */}
-      <PolymorphicSection variant="default" parallaxSpeed={0.2} className="py-8">
-        <div id="contact">
-          <Contact />
         </div>
       </PolymorphicSection>
 

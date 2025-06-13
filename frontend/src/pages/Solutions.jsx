@@ -14,7 +14,6 @@ const Solutions = () => {
       subtitle: "Plan. Track. Succeed.",
       description: "Our project management software is built to simplify the complex and empower your teams to work smarter, not harder. With powerful features like task assignment, timeline tracking, Gantt charts, and real-time collaboration, you can monitor every aspect of your projects in one central dashboard.",
       icon: "📊",
-      price: "Starting at $29/month per user",
       features: [
         "Advanced task management and assignment",
         "Interactive Gantt charts and timelines", 
@@ -39,7 +38,6 @@ const Solutions = () => {
       subtitle: "Audit Smarter, Not Harder.",
       description: "Take control of your audit processes with our powerful Internal Audit Management Software. Designed for speed, structure, and security, it enables audit teams to plan, execute, and report with efficiency and consistency. Use built-in templates, automated scheduling, and real-time dashboards to gain full visibility.",
       icon: "🛡",
-      price: "Starting at $49/month per user",
       features: [
         "Comprehensive audit planning tools",
         "Automated finding tracking system", 
@@ -64,7 +62,6 @@ const Solutions = () => {
       subtitle: "Stay Ahead of Risk. Stay Ahead of the Game.",
       description: "In an environment where regulations evolve constantly and risks emerge daily, you need more than spreadsheets to stay compliant—you need intelligence. Our Risk & Compliance Management Software helps you proactively identify, assess, and respond to risk across the enterprise.",
       icon: "⚙",
-      price: "Starting at $79/month per user",
       features: [
         "Proactive risk assessment tools",
         "Automated compliance controls", 
@@ -136,9 +133,13 @@ const Solutions = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="space-y-24">
             {products.map((product, index) => (
-              <div key={product.id} className={`grid lg:grid-cols-2 gap-16 items-center ${
-                index % 2 === 1 ? 'lg:grid-flow-col-dense' : ''
-              }`}>
+              <div 
+                key={product.id} 
+                id={product.id}
+                className={`grid lg:grid-cols-2 gap-16 items-center scroll-mt-24 ${
+                  index % 2 === 1 ? 'lg:grid-flow-col-dense' : ''
+                }`}
+              >
                 {/* Content */}
                 <div className={index % 2 === 1 ? 'lg:col-start-2' : ''}>
                   <div className="text-6xl mb-6">{product.icon}</div>
@@ -147,8 +148,7 @@ const Solutions = () => {
                   }`}>
                     {product.title}
                   </h2>
-                  <p className="text-red-500 font-medium text-lg mb-4">{product.subtitle}</p>
-                  <p className="text-green-600 font-semibold mb-6">{product.price}</p>
+                  <p className="text-red-500 font-medium text-lg mb-6">{product.subtitle}</p>
                   <p className={`text-lg mb-8 ${
                     isDarkMode ? 'text-gray-300' : 'text-gray-600'
                   }`}>

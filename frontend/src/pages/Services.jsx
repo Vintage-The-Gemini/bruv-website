@@ -9,6 +9,7 @@ const Services = () => {
 
   const services = [
     {
+      id: 'project-management',
       icon: BarChart3,
       title: "Project Management Services",
       subtitle: "Strategic Solutions. Tangible Results.",
@@ -29,6 +30,7 @@ const Services = () => {
       ]
     },
     {
+      id: 'is-audit',
       icon: Shield,
       title: "Information Systems Audit",
       subtitle: "Comprehensive IT Evaluation.",
@@ -49,6 +51,7 @@ const Services = () => {
       ]
     },
     {
+      id: 'qa-services',
       icon: CheckCircle,
       title: "Quality Assurance Services",
       subtitle: "Excellence in Every Detail.",
@@ -69,6 +72,7 @@ const Services = () => {
       ]
     },
     {
+      id: 'risk-advisory',
       icon: Target,
       title: "Risk & Compliance Advisory",
       subtitle: "Stay Ahead of Regulations.",
@@ -139,9 +143,13 @@ const Services = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="space-y-24">
             {services.map((service, index) => (
-              <div key={index} className={`grid lg:grid-cols-2 gap-16 items-center ${
-                index % 2 === 1 ? 'lg:grid-flow-col-dense' : ''
-              }`}>
+              <div 
+                key={index} 
+                id={service.id}
+                className={`grid lg:grid-cols-2 gap-16 items-center scroll-mt-24 ${
+                  index % 2 === 1 ? 'lg:grid-flow-col-dense' : ''
+                }`}
+              >
                 {/* Content */}
                 <div className={index % 2 === 1 ? 'lg:col-start-2' : ''}>
                   <div className={`w-16 h-16 ${
