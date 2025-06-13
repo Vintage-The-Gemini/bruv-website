@@ -1,4 +1,4 @@
-// FILE PATH: src/pages/Services.jsx
+// FILE PATH: src/pages/Services.jsx - Complete and Fixed
 
 import React from 'react';
 import { BarChart3, Shield, CheckCircle, Target, ArrowRight, Clock, DollarSign, Users, TrendingUp } from 'lucide-react';
@@ -120,16 +120,18 @@ const Services = () => {
   return (
     <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900' : 'bg-white'}`}>
       {/* Hero Section */}
-      <section className={`pt-24 pb-16 ${isDarkMode ? 'bg-gray-800' : 'bg-gray-50'}`}>
+      <section className={`pt-24 pb-16 ${
+        isDarkMode ? 'bg-gray-800' : ''
+      }`} style={{backgroundColor: isDarkMode ? '' : '#2D1B69'}}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h1 className={`text-4xl md:text-5xl font-bold mb-6 ${
-              isDarkMode ? 'text-white' : 'text-gray-900'
+              isDarkMode ? 'text-white' : 'text-white'
             }`}>
               Our <span className="text-red-500">Services</span>
             </h1>
             <p className={`text-xl max-w-3xl mx-auto ${
-              isDarkMode ? 'text-gray-300' : 'text-gray-600'
+              isDarkMode ? 'text-gray-300' : 'text-gray-300'
             }`}>
               Comprehensive solutions that strengthen your organizational controls and drive successful outcomes. 
               We handle the heavy lifting so you can focus your expertise where it matters most.
@@ -158,8 +160,8 @@ const Services = () => {
                     <service.icon className="w-8 h-8 text-red-500" />
                   </div>
                   <h2 className={`text-3xl md:text-4xl font-bold mb-3 ${
-                    isDarkMode ? 'text-white' : 'text-gray-900'
-                  }`}>
+                    isDarkMode ? 'text-white' : ''
+                  }`} style={{color: isDarkMode ? 'white' : '#2D1B69'}}>
                     {service.title}
                   </h2>
                   <p className="text-red-500 font-medium text-lg mb-6">{service.subtitle}</p>
@@ -195,8 +197,8 @@ const Services = () => {
                     isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-100'
                   } border shadow-lg`}>
                     <h3 className={`text-xl font-semibold mb-6 ${
-                      isDarkMode ? 'text-white' : 'text-gray-900'
-                    }`}>
+                      isDarkMode ? 'text-white' : ''
+                    }`} style={{color: isDarkMode ? 'white' : '#2D1B69'}}>
                       Key Benefits
                     </h3>
                     <div className="space-y-4">
@@ -228,8 +230,8 @@ const Services = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className={`text-3xl md:text-4xl font-bold mb-4 ${
-              isDarkMode ? 'text-white' : 'text-gray-900'
-            }`}>
+              isDarkMode ? 'text-white' : ''
+            }`} style={{color: isDarkMode ? 'white' : '#2D1B69'}}>
               Our Process
             </h2>
             <p className={`text-lg max-w-3xl mx-auto ${
@@ -253,8 +255,8 @@ const Services = () => {
                   )}
                 </div>
                 <h3 className={`text-xl font-semibold mb-3 ${
-                  isDarkMode ? 'text-white' : 'text-gray-900'
-                }`}>
+                  isDarkMode ? 'text-white' : ''
+                }`} style={{color: isDarkMode ? 'white' : '#2D1B69'}}>
                   {step.title}
                 </h3>
                 <p className={`text-sm ${
@@ -272,8 +274,8 @@ const Services = () => {
       <section className={`py-16 ${isDarkMode ? 'bg-gray-900' : 'bg-white'}`}>
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className={`text-3xl md:text-4xl font-bold mb-6 ${
-            isDarkMode ? 'text-white' : 'text-gray-900'
-          }`}>
+            isDarkMode ? 'text-white' : ''
+          }`} style={{color: isDarkMode ? 'white' : '#2D1B69'}}>
             Ready to Get Started?
           </h2>
           <p className={`text-lg mb-8 ${
@@ -289,7 +291,7 @@ const Services = () => {
             <button className={`border-2 font-medium px-8 py-3 rounded-lg transition-all duration-200 ${
               isDarkMode 
                 ? 'border-gray-600 text-gray-300 hover:border-gray-500 hover:bg-gray-700' 
-                : 'border-gray-300 text-gray-700 hover:border-gray-400 hover:bg-gray-50'
+                : 'border-purple-900 text-purple-900 hover:bg-purple-900 hover:text-white'
             }`}>
               View Case Studies
             </button>

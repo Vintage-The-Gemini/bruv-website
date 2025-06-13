@@ -1,4 +1,4 @@
-// FILE PATH: src/pages/Solutions.jsx
+// FILE PATH: src/pages/Solutions.jsx - Consistent Color Palette
 
 import React from 'react';
 import { CheckCircle, Download, Play, ArrowRight, BarChart3, Users, Shield, Zap } from 'lucide-react';
@@ -96,16 +96,18 @@ const Solutions = () => {
   return (
     <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900' : 'bg-white'}`}>
       {/* Hero Section */}
-      <section className={`pt-24 pb-16 ${isDarkMode ? 'bg-gray-800' : 'bg-gray-50'}`}>
+      <section className={`pt-24 pb-16 ${
+        isDarkMode ? 'bg-gray-800' : ''
+      }`} style={{backgroundColor: isDarkMode ? '' : '#2D1B69'}}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h1 className={`text-4xl md:text-5xl font-bold mb-6 ${
-              isDarkMode ? 'text-white' : 'text-gray-900'
+              isDarkMode ? 'text-white' : 'text-white'
             }`}>
               Smart Tools for <span className="text-red-500">Smarter Teams</span>
             </h1>
             <p className={`text-xl max-w-3xl mx-auto mb-8 ${
-              isDarkMode ? 'text-gray-300' : 'text-gray-600'
+              isDarkMode ? 'text-gray-300' : 'text-gray-300'
             }`}>
               Our software solutions are built to simplify the complex and empower your teams 
               to work smarter, not harder. Choose the right solution for your organization.
@@ -118,7 +120,7 @@ const Solutions = () => {
               <button className={`border-2 font-medium px-8 py-3 rounded-lg transition-all duration-200 inline-flex items-center ${
                 isDarkMode 
                   ? 'border-gray-600 text-gray-300 hover:border-gray-500 hover:bg-gray-700' 
-                  : 'border-gray-300 text-gray-700 hover:border-gray-400 hover:bg-gray-50'
+                  : 'border-white/20 hover:border-white/40 hover:bg-white/10 text-white'
               }`}>
                 <Download className="mr-2 w-5 h-5" />
                 Download Brochure
@@ -144,8 +146,8 @@ const Solutions = () => {
                 <div className={index % 2 === 1 ? 'lg:col-start-2' : ''}>
                   <div className="text-6xl mb-6">{product.icon}</div>
                   <h2 className={`text-3xl md:text-4xl font-bold mb-3 ${
-                    isDarkMode ? 'text-white' : 'text-gray-900'
-                  }`}>
+                    isDarkMode ? 'text-white' : ''
+                  }`} style={{color: isDarkMode ? 'white' : '#2D1B69'}}>
                     {product.title}
                   </h2>
                   <p className="text-red-500 font-medium text-lg mb-6">{product.subtitle}</p>
@@ -177,7 +179,7 @@ const Solutions = () => {
                     <button className={`border-2 font-medium px-8 py-3 rounded-lg transition-all duration-200 ${
                       isDarkMode 
                         ? 'border-gray-600 text-gray-300 hover:border-gray-500 hover:bg-gray-700' 
-                        : 'border-gray-300 text-gray-700 hover:border-gray-400 hover:bg-gray-50'
+                        : 'border-purple-900 text-purple-900 hover:bg-purple-900 hover:text-white'
                     }`}>
                       Request Demo
                     </button>
@@ -190,8 +192,8 @@ const Solutions = () => {
                     isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-100'
                   } border shadow-lg`}>
                     <h3 className={`text-xl font-semibold mb-6 ${
-                      isDarkMode ? 'text-white' : 'text-gray-900'
-                    }`}>
+                      isDarkMode ? 'text-white' : ''
+                    }`} style={{color: isDarkMode ? 'white' : '#2D1B69'}}>
                       Key Benefits
                     </h3>
                     <div className="space-y-4">
@@ -235,8 +237,8 @@ const Solutions = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className={`text-3xl md:text-4xl font-bold mb-4 ${
-              isDarkMode ? 'text-white' : 'text-gray-900'
-            }`}>
+              isDarkMode ? 'text-white' : ''
+            }`} style={{color: isDarkMode ? 'white' : '#2D1B69'}}>
               Compare Our Solutions
             </h2>
             <p className={`text-lg max-w-3xl mx-auto ${
@@ -254,14 +256,14 @@ const Solutions = () => {
                 <thead className={isDarkMode ? 'bg-gray-800' : 'bg-gray-50'}>
                   <tr>
                     <th className={`px-6 py-4 text-left font-semibold ${
-                      isDarkMode ? 'text-white' : 'text-gray-900'
-                    }`}>
+                      isDarkMode ? 'text-white' : ''
+                    }`} style={{color: isDarkMode ? 'white' : '#2D1B69'}}>
                       Features
                     </th>
                     {products.map(product => (
                       <th key={product.id} className={`px-6 py-4 text-center font-semibold ${
-                        isDarkMode ? 'text-white' : 'text-gray-900'
-                      }`}>
+                        isDarkMode ? 'text-white' : ''
+                      }`} style={{color: isDarkMode ? 'white' : '#2D1B69'}}>
                         {product.title.split(' ')[0]} {product.title.split(' ')[1]}
                       </th>
                     ))}
@@ -293,8 +295,8 @@ const Solutions = () => {
       <section className={`py-16 ${isDarkMode ? 'bg-gray-900' : 'bg-white'}`}>
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className={`text-3xl md:text-4xl font-bold mb-6 ${
-            isDarkMode ? 'text-white' : 'text-gray-900'
-          }`}>
+            isDarkMode ? 'text-white' : ''
+          }`} style={{color: isDarkMode ? 'white' : '#2D1B69'}}>
             Ready to Transform Your Operations?
           </h2>
           <p className={`text-lg mb-8 ${
@@ -310,7 +312,7 @@ const Solutions = () => {
             <button className={`border-2 font-medium px-8 py-3 rounded-lg transition-all duration-200 ${
               isDarkMode 
                 ? 'border-gray-600 text-gray-300 hover:border-gray-500 hover:bg-gray-700' 
-                : 'border-gray-300 text-gray-700 hover:border-gray-400 hover:bg-gray-50'
+                : 'border-purple-900 text-purple-900 hover:bg-purple-900 hover:text-white'
             }`}>
               Schedule Demo
             </button>

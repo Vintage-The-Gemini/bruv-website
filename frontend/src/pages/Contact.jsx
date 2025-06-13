@@ -1,4 +1,4 @@
-// FILE PATH: src/pages/Contact.jsx
+// FILE PATH: src/pages/Contact.jsx - Consistent Color Palette
 
 import React, { useState } from 'react';
 import { Mail, Phone, MapPin, Clock, Send, CheckCircle } from 'lucide-react';
@@ -105,8 +105,8 @@ const Contact = () => {
         } shadow-lg`}>
           <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-6" />
           <h2 className={`text-2xl font-bold mb-4 ${
-            isDarkMode ? 'text-white' : 'text-gray-900'
-          }`}>
+            isDarkMode ? 'text-white' : ''
+          }`} style={{color: isDarkMode ? 'white' : '#2D1B69'}}>
             Asante Sana!
           </h2>
           <p className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>
@@ -120,16 +120,18 @@ const Contact = () => {
   return (
     <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900' : 'bg-white'}`}>
       {/* Hero Section */}
-      <section className={`pt-24 pb-16 ${isDarkMode ? 'bg-gray-800' : 'bg-gray-50'}`}>
+      <section className={`pt-24 pb-16 ${
+        isDarkMode ? 'bg-gray-800' : ''
+      }`} style={{backgroundColor: isDarkMode ? '' : '#2D1B69'}}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h1 className={`text-4xl md:text-5xl font-bold mb-6 ${
-              isDarkMode ? 'text-white' : 'text-gray-900'
+              isDarkMode ? 'text-white' : 'text-white'
             }`}>
               Get in <span className="text-red-500">Touch</span>
             </h1>
             <p className={`text-xl max-w-3xl mx-auto ${
-              isDarkMode ? 'text-gray-300' : 'text-gray-600'
+              isDarkMode ? 'text-gray-300' : 'text-gray-300'
             }`}>
               Ready to transform your organization's operational control? We're here to help. 
               Contact us today to discuss your specific needs and learn how Bruv can make a difference.
@@ -155,8 +157,8 @@ const Contact = () => {
                   <info.icon className="w-8 h-8 text-red-500" />
                 </div>
                 <h3 className={`font-semibold mb-3 ${
-                  isDarkMode ? 'text-white' : 'text-gray-900'
-                }`}>
+                  isDarkMode ? 'text-white' : ''
+                }`} style={{color: isDarkMode ? 'white' : '#2D1B69'}}>
                   {info.title}
                 </h3>
                 {info.details.map((detail, detailIndex) => (
@@ -183,8 +185,8 @@ const Contact = () => {
                 isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'
               } border shadow-lg`}>
                 <h2 className={`text-2xl font-bold mb-6 ${
-                  isDarkMode ? 'text-white' : 'text-gray-900'
-                }`}>
+                  isDarkMode ? 'text-white' : ''
+                }`} style={{color: isDarkMode ? 'white' : '#2D1B69'}}>
                   Send us a Message
                 </h2>
                 
@@ -368,8 +370,8 @@ const Contact = () => {
             {/* Office Location */}
             <div>
               <h2 className={`text-2xl font-bold mb-6 ${
-                isDarkMode ? 'text-white' : 'text-gray-900'
-              }`}>
+                isDarkMode ? 'text-white' : ''
+              }`} style={{color: isDarkMode ? 'white' : '#2D1B69'}}>
                 Our Office
               </h2>
               
@@ -377,8 +379,8 @@ const Contact = () => {
                 isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-100'
               } border mb-8`}>
                 <h3 className={`font-semibold mb-3 ${
-                  isDarkMode ? 'text-white' : 'text-gray-900'
-                }`}>
+                  isDarkMode ? 'text-white' : ''
+                }`} style={{color: isDarkMode ? 'white' : '#2D1B69'}}>
                   {office.city} Headquarters
                 </h3>
                 <div className={`space-y-2 text-sm ${
@@ -394,8 +396,8 @@ const Contact = () => {
               {/* Quick Info Section */}
               <div className="mt-8">
                 <h3 className={`text-lg font-semibold mb-4 ${
-                  isDarkMode ? 'text-white' : 'text-gray-900'
-                }`}>
+                  isDarkMode ? 'text-white' : ''
+                }`} style={{color: isDarkMode ? 'white' : '#2D1B69'}}>
                   Quick Information
                 </h3>
                 <div className={`p-4 rounded-lg ${
@@ -422,8 +424,8 @@ const Contact = () => {
               {/* Local Information */}
               <div className="mt-8">
                 <h3 className={`text-lg font-semibold mb-4 ${
-                  isDarkMode ? 'text-white' : 'text-gray-900'
-                }`}>
+                  isDarkMode ? 'text-white' : ''
+                }`} style={{color: isDarkMode ? 'white' : '#2D1B69'}}>
                   Local Expertise
                 </h3>
                 <div className={`p-4 rounded-lg ${
