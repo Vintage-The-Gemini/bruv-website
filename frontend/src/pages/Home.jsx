@@ -12,6 +12,7 @@ const Home = () => {
 
   return (
     <div className="Home">
+        
       {/* Hero Section */}
       <section id="hero">
         <Hero />

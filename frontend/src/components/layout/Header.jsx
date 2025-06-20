@@ -37,7 +37,7 @@ const Header = () => {
                 src={bruvLogo} 
                 alt="Bruv Logo" 
                 className="object-contain transition-all duration-300 hover:scale-105"
-                style={{width: '100px', height: '100px', minWidth: '100px', minHeight: '100px'}}
+                style={{width: '200px', height: '200px', minWidth: '100px', minHeight: '100px'}}
               />
             </Link>
           </div>

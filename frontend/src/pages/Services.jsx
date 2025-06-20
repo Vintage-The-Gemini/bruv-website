@@ -107,12 +107,12 @@ const Services = () => {
     },
     {
       step: "03",
-      title: "Implementation", 
+      title: "Execution", 
       description: "We execute the strategy with precision, ensuring minimal disruption to your ongoing operations."
     },
     {
       step: "04",
-      title: "Monitoring & Optimization",
+      title: "Continous reporting",
       description: "Continuous monitoring and optimization ensure sustained success and continuous improvement."
     }
   ];
