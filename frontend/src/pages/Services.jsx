@@ -1,6 +1,7 @@
-// FILE PATH: src/pages/Services.jsx - Complete and Fixed
+// FILE PATH: src/pages/Services.jsx - Fixed with Link Import
 
 import React from 'react';
+import { Link } from 'react-router-dom'; // Added missing import
 import { BarChart3, Shield, CheckCircle, Target, ArrowRight, Clock, DollarSign, Users, TrendingUp } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 
@@ -185,10 +186,13 @@ const Services = () => {
                     ))}
                   </div>
 
-                  <button className="bg-red-500 hover:bg-red-600 text-white font-medium px-8 py-3 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl inline-flex items-center">
+                  <Link 
+                    to="/contact"
+                    className="bg-red-500 hover:bg-red-600 text-white font-medium px-8 py-3 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl inline-flex items-center"
+                  >
                     Learn More
                     <ArrowRight className="ml-2 w-5 h-5" />
-                  </button>
+                  </Link>
                 </div>
 
                 {/* Benefits Card */}
@@ -285,9 +289,12 @@ const Services = () => {
             controls and drive successful outcomes.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="bg-red-500 hover:bg-red-600 text-white font-medium px-8 py-3 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl">
+            <Link 
+              to="/contact"
+              className="bg-red-500 hover:bg-red-600 text-white font-medium px-8 py-3 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl"
+            >
               Schedule Consultation
-            </button>
+            </Link>
             <button className={`border-2 font-medium px-8 py-3 rounded-lg transition-all duration-200 ${
               isDarkMode 
                 ? 'border-gray-600 text-gray-300 hover:border-gray-500 hover:bg-gray-700' 
@@ -296,7 +303,7 @@ const Services = () => {
               View Case Studies
             </button>
           </div>
-        </div>
+      </div>
       </section>
     </div>
   );

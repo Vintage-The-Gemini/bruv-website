@@ -1,8 +1,8 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
 body {
   font-family: 'Inter', sans-serif;
@@ -402,22 +402,29 @@ html {
   .no-print {
     display: none !important;
   }
-}@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
-
-body {
-  font-family: 'Inter', sans-serif;
-  margin: 0;
-  padding: 0;
 }
 
-.bg-navy-gradient {
-  background: linear-gradient(135deg, #2D1B69 0%, #1A0F3F 100%);
+/* Add this to your index.css file */
+
+/* Grid background pattern */
+.bg-grid-white\/\[0\.02\] {
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
 }
 
-html {
-  scroll-behavior: smooth;
+/* Additional animation delays for staggered effects */
+.animation-delay-100 { animation-delay: 0.1s; }
+.animation-delay-200 { animation-delay: 0.2s; }
+.animation-delay-300 { animation-delay: 0.3s; }
+.animation-delay-400 { animation-delay: 0.4s; }
+.animation-delay-500 { animation-delay: 0.5s; }
+
+/* Enhanced hover effects */
+.hover-glow {
+  transition: all 0.3s ease;
+}
+
+.hover-glow:hover {
+  filter: drop-shadow(0 0 20px rgba(239, 68, 68, 0.5));
 }
