@@ -1,4 +1,4 @@
-// FILE PATH: src/components/layout/Header.jsx (With Multiple Logo Variations)
+// FILE PATH: src/components/layout/Header.jsx (Fixed Sizing)
 
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
@@ -26,7 +26,7 @@ const Header = () => {
   const getLogoSrc = () => {
     if (!isScrolled) {
       // When not scrolled (on hero section), use white logo
-      return bruvLogo01;
+      return bruvLogo02;
     } else {
       // When scrolled (on other sections), use bruv-03
       return bruvLogo01;
@@ -63,10 +63,10 @@ const Header = () => {
                 alt="Bruv Logo"
                 className="object-contain transition-all duration-300 group-hover:scale-105"
                 style={{
-                  width: isScrolled ? "150px" : "150px",
-                  height: isScrolled ? "150px" : "150px",
-                  minWidth: isScrolled ? "300px" : "300px",
-                  minHeight: isScrolled ? "200px" : "200px",
+                  width: isScrolled ? "80px" : "120px",
+                  height: isScrolled ? "80px" : "120px",
+                  maxWidth: "120px",
+                  maxHeight: "120px",
                   filter: getLogoFilter(),
                 }}
               />
