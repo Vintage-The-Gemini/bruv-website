@@ -1,14 +1,14 @@
 // FILE PATH: src/components/layout/Header.jsx (With Multiple Logo Variations)
 
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import Navbar from './Navbar';
-import ThemeToggle from '../ui/ThemeToggle';
-import { useTheme } from '../../contexts/ThemeContext';
+import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import Navbar from "./Navbar";
+import ThemeToggle from "../ui/ThemeToggle";
+import { useTheme } from "../../contexts/ThemeContext";
 // Import your logo variations
-import bruvLogo01 from '../../assets/images/bruv-01.png'; // Original white logo
-import bruvLogo02 from '../../assets/images/bruv-02.png'; // Dark/colored logo
-import bruvLogo03 from '../../assets/images/bruv-03.png'; // Alternative logo
+import bruvLogo01 from "../../assets/images/bruv-01.png"; // Original white logo
+import bruvLogo02 from "../../assets/images/bruv-02.png"; // Dark/colored logo
+import bruvLogo03 from "../../assets/images/bruv-03.png"; // Alternative logo
 
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -18,8 +18,8 @@ const Header = () => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
     };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   // Determine which logo to show based on scroll state and theme
@@ -36,21 +36,21 @@ const Header = () => {
   const getLogoFilter = () => {
     if (!isScrolled) {
       // On hero section, ensure visibility with white logo
-      return 'brightness(0) invert(1)';
+      return "brightness(0) invert(1)";
     } else {
       // When scrolled, use bruv-03 without filters for its original colors
-      return 'none';
+      return "none";
     }
   };
 
   return (
-    <header 
+    <header
       className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
-        isScrolled 
-          ? `${isDarkMode ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-lg shadow-lg border-b ${
-              isDarkMode ? 'border-gray-800' : 'border-gray-200'
-            }` 
-          : 'bg-transparent'
+        isScrolled
+          ? `${isDarkMode ? "bg-gray-900/95" : "bg-white/95"} backdrop-blur-lg shadow-lg border-b ${
+              isDarkMode ? "border-gray-800" : "border-gray-200"
+            }`
+          : "bg-transparent"
       }`}
     >
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -58,16 +58,16 @@ const Header = () => {
           {/* Logo Section - Responsive sizing */}
           <div className="flex items-center">
             <Link to="/" className="flex items-center justify-center group">
-              <img 
-                src={getLogoSrc()} 
-                alt="Bruv Logo" 
+              <img
+                src={getLogoSrc()}
+                alt="Bruv Logo"
                 className="object-contain transition-all duration-300 group-hover:scale-105"
                 style={{
-                  width: isScrolled ? '80px' : '120px',
-                  height: isScrolled ? '80px' : '120px',
-                  minWidth: isScrolled ? '60px' : '80px',
-                  minHeight: isScrolled ? '60px' : '80px',
-                  filter: getLogoFilter()
+                  width: isScrolled ? "150px" : "150px",
+                  height: isScrolled ? "150px" : "150px",
+                  minWidth: isScrolled ? "300px" : "300px",
+                  minHeight: isScrolled ? "200px" : "200px",
+                  filter: getLogoFilter(),
                 }}
               />
             </Link>
