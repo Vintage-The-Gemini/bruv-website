@@ -9,21 +9,21 @@ const Products = () => {
 
   const products = [
     {
-      title: "Project Management Software",
+      title: "Bruv Project Management Software",
       subtitle: "Plan. Track. Succeed.",
       description: "Powerful features like task assignment, timeline tracking, Gantt charts, and real-time collaboration in one central dashboard.",
       icon: "📊",
       features: ["Task Management", "Gantt Charts", "Team Collaboration", "Progress Tracking"]
     },
     {
-      title: "Internal Audit Management",
+      title: "Bruv Audit Management Software",
       subtitle: "Audit Smarter, Not Harder.",
       description: "Streamline audit processes with built-in templates, automated scheduling, and real-time dashboards for full visibility.",
       icon: "🛡",
       features: ["Audit Planning", "Finding Tracking", "Report Generation", "Compliance Monitoring"]
     },
     {
-      title: "Risk & Compliance Management",
+      title: "Bruv Risk & Compliance Management Software",
       subtitle: "Stay Ahead of Risk.",
       description: "Proactively identify, assess, and respond to risk across the enterprise with intelligent automation.",
       icon: "⚙",

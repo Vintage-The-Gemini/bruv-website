@@ -170,15 +170,15 @@ const About = () => {
               } rounded-3xl p-8 shadow-2xl`}>
                 <div className="grid grid-cols-2 gap-6 text-center">
                   <div className={`${isDarkMode ? 'bg-gray-700' : 'bg-white'} rounded-2xl p-6 shadow-lg`}>
-                    <div className="text-4xl font-bold text-red-500 mb-2">4+</div>
+                    <div className="text-4xl font-bold text-red-500 mb-2">15+</div>
                     <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Years of Innovation</p>
                   </div>
                   <div className={`${isDarkMode ? 'bg-gray-700' : 'bg-white'} rounded-2xl p-6 shadow-lg`}>
-                    <div className="text-4xl font-bold text-green-500 mb-2">100+</div>
+                    <div className="text-4xl font-bold text-green-500 mb-2">10+</div>
                     <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Organizations Served</p>
                   </div>
                   <div className={`${isDarkMode ? 'bg-gray-700' : 'bg-white'} rounded-2xl p-6 shadow-lg`}>
-                    <div className="text-4xl font-bold text-blue-500 mb-2">50+</div>
+                    <div className="text-4xl font-bold text-blue-500 mb-2">5+</div>
                     <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Team Members</p>
                   </div>
                   <div className={`${isDarkMode ? 'bg-gray-700' : 'bg-white'} rounded-2xl p-6 shadow-lg`}>

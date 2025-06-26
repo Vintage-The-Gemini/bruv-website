@@ -36,12 +36,12 @@ const Services = () => {
 
   return (
     <section id="services" className={`py-20 ${isDarkMode ? 'bg-gray-900' : 'bg-white'}`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className={`text-3xl md:text-4xl font-bold mb-4 ${
             isDarkMode ? 'text-white' : ''
           }`} style={{color: isDarkMode ? 'white' : '#2D1B69'}}>
-            Strategic Solutions. <span className="text-red-500">Tangible Results.</span>
+            Professional Services <span className="text-red-500">Tangible Results.</span>
           </h2>
           <p className={`text-lg max-w-3xl mx-auto ${
             isDarkMode ? 'text-gray-300' : 'text-gray-600'
