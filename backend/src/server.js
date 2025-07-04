@@ -25,8 +25,8 @@ app.use(cors({
     process.env.FRONTEND_URL,
     'http://localhost:5173', // Local development
     'http://localhost:3000', // Alternative local port
-    'https://bruv.co.ke',    // Your domain
-    'https://www.bruv.co.ke' // WWW version
+    'https://bruv.africa',    // Your domain
+    'https://www.bruv.africa' // WWW version
   ],
   credentials: true,
   methods: ['GET', 'POST', 'OPTIONS'],
