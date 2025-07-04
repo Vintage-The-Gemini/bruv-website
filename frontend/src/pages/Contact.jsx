@@ -53,20 +53,24 @@ const Contact = () => {
   };
 
   const getApiUrl = () => {
+    // First priority: Environment variable
+    if (process.env.REACT_APP_API_URL) {
+      return process.env.REACT_APP_API_URL;
+    }
+    
     // Production environment detection
     const isProduction = window.location.hostname !== 'localhost' && 
                         window.location.hostname !== '127.0.0.1' &&
                         !window.location.hostname.includes('192.168');
     
     if (isProduction) {
-      // Use environment variable if available, otherwise construct from current domain
-      return process.env.REACT_APP_API_URL || 
-             `${window.location.protocol}//${window.location.hostname.replace('www.', '')}-api.onrender.com` ||
-             'https://your-backend-service.onrender.com'; // Replace with your actual backend URL
+      // For production, you need to set the exact backend URL
+      // Replace this with your actual Render backend service URL
+      return 'https://your-actual-backend-service.onrender.com';
     }
     
     // Development fallback
-    return process.env.REACT_APP_API_URL || 'http://localhost:5000';
+    return 'http://localhost:5000';
   };
 
   const handleSubmit = async (e) => {
