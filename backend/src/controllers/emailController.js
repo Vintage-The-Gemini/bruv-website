@@ -1,31 +1,51 @@
 // FILE PATH: backend/src/controllers/emailController.js
-// Email handling and sending logic using Nodemailer
+// Email handling and sending logic using Nodemailer with enhanced error handling
 
 const nodemailer = require('nodemailer');
 
 // Create transporter with SMTP configuration
 const createTransporter = () => {
+  console.log('🔧 Creating SMTP transporter with config:', {
+    host: process.env.SMTP_HOST,
+    port: process.env.SMTP_PORT,
+    user: process.env.SMTP_USER ? 'SET' : 'NOT SET',
+    pass: process.env.SMTP_PASS ? 'SET' : 'NOT SET'
+  });
+
   return nodemailer.createTransporter({
     host: process.env.SMTP_HOST,
     port: parseInt(process.env.SMTP_PORT) || 587,
-    secure: false, // true for 465, false for other ports
+    secure: process.env.SMTP_PORT == 465, // true for 465, false for other ports
     auth: {
       user: process.env.SMTP_USER,
       pass: process.env.SMTP_PASS,
     },
     tls: {
-      rejectUnauthorized: false
-    }
+      rejectUnauthorized: false,
+      ciphers: 'SSLv3'
+    },
+    connectionTimeout: 10000, // 10 seconds
+    greetingTimeout: 5000, // 5 seconds
+    socketTimeout: 10000, // 10 seconds
   });
 };
 
 // Send contact form email
 const sendContactEmail = async (contactData) => {
   try {
+    console.log('📧 Starting email sending process...');
+    
     const transporter = createTransporter();
 
-    // Verify SMTP connection
-    await transporter.verify();
+    // Test SMTP connection first
+    console.log('🔍 Verifying SMTP connection...');
+    try {
+      await transporter.verify();
+      console.log('✅ SMTP connection verified successfully');
+    } catch (verifyError) {
+      console.error('❌ SMTP verification failed:', verifyError.message);
+      throw new Error(`SMTP Connection Failed: ${verifyError.message}`);
+    }
 
     const {
       firstName,
@@ -40,6 +60,8 @@ const sendContactEmail = async (contactData) => {
       userAgent,
       ipAddress
     } = contactData;
+
+    console.log('📝 Preparing email content...');
 
     // Email content
     const htmlContent = `
@@ -121,7 +143,7 @@ const sendContactEmail = async (contactData) => {
           <!-- Header -->
           <div class="header">
             <h1 style="margin: 0; font-size: 24px;">🔔 New Contact Form Submission</h1>
-            <p style="margin: 10px 0 0 0; opacity: 0.9;">From: bruv.co.ke</p>
+            <p style="margin: 10px 0 0 0; opacity: 0.9;">From: bruv.africa</p>
           </div>
 
           <!-- Customer Information -->
@@ -159,43 +181,34 @@ const sendContactEmail = async (contactData) => {
             </div>
             ` : ''}
 
-            <div class="field">
-              <span class="label">📝 Subject:</span>
-              <span class="value">${subject}</span>
+            <!-- Subject and Message -->
+            <div class="urgent">
+              <h3 style="color: #856404; margin: 0 0 10px 0; font-size: 18px;">📌 Subject: ${subject}</h3>
             </div>
-          </div>
 
-          <!-- Message Content -->
-          <div class="content">
-            <h2 style="color: #2D1B69; margin-bottom: 15px; font-size: 20px;">💬 Message</h2>
             <div class="message-box">
-              <p style="margin: 0; white-space: pre-wrap;">${message}</p>
+              <h3 style="color: #2D1B69; margin: 0 0 15px 0; font-size: 18px;">💬 Message:</h3>
+              <div style="font-size: 16px; line-height: 1.6; color: #333;">
+                ${message.replace(/\n/g, '<br>')}
+              </div>
             </div>
-          </div>
 
-          <!-- Action Required -->
-          <div class="urgent">
-            <h3 style="margin: 0 0 10px 0; color: #856404;">⚡ Action Required</h3>
-            <p style="margin: 0; color: #856404;">
-              <strong>Response Time:</strong> Please respond within 24 hours<br>
-              <strong>Priority:</strong> New customer inquiry
-            </p>
-          </div>
-
-          <!-- Technical Information -->
-          <div class="content">
-            <h3 style="color: #666; font-size: 16px; margin-bottom: 10px;">🔧 Technical Details</h3>
-            <div style="font-size: 12px; color: #888; background: #f8f9fa; padding: 15px; border-radius: 5px;">
-              <p style="margin: 5px 0;"><strong>Timestamp:</strong> ${new Date(timestamp).toLocaleString()}</p>
-              <p style="margin: 5px 0;"><strong>IP Address:</strong> ${ipAddress || 'Unknown'}</p>
-              <p style="margin: 5px 0;"><strong>User Agent:</strong> ${userAgent || 'Unknown'}</p>
+            <!-- Technical Details -->
+            <div style="background: #e9ecef; padding: 15px; border-radius: 8px; margin-top: 30px;">
+              <h4 style="color: #6c757d; margin: 0 0 10px 0; font-size: 14px;">🔧 Technical Details:</h4>
+              <p style="margin: 5px 0; font-size: 12px; color: #6c757d;">
+                <strong>Submitted:</strong> ${new Date(timestamp).toLocaleString()}<br>
+                <strong>IP Address:</strong> ${ipAddress || 'Unknown'}<br>
+                <strong>User Agent:</strong> ${userAgent || 'Unknown'}
+              </p>
             </div>
           </div>
 
           <!-- Footer -->
           <div class="footer">
-            <p>This email was automatically generated from the contact form on bruv.co.ke</p>
-            <p>© 2025 Bruv. All rights reserved.</p>
+            <p style="margin: 0;">This email was automatically generated from the Bruv contact form.</p>
+            <p style="margin: 5px 0 0 0;">Please respond within 24 hours for optimal customer service.</p>
+            <p style="margin: 15px 0 0 0; font-size: 10px;">© 2025 Bruv Africa. All rights reserved.</p>
           </div>
         </div>
       </body>
@@ -204,7 +217,7 @@ const sendContactEmail = async (contactData) => {
 
     // Plain text version
     const textContent = `
-New Contact Form Submission from bruv.co.ke
+New Contact Form Submission from bruv.africa
 
 Customer Information:
 - Name: ${firstName} ${lastName}
@@ -221,8 +234,13 @@ ${message}
 Technical Details:
 - Submitted: ${new Date(timestamp).toLocaleString()}
 - IP Address: ${ipAddress || 'Unknown'}
+- User Agent: ${userAgent || 'Unknown'}
 
 Please respond within 24 hours.
+
+---
+This email was automatically generated from the Bruv contact form.
+© 2025 Bruv Africa. All rights reserved.
     `;
 
     // Email options
@@ -236,32 +254,123 @@ Please respond within 24 hours.
       headers: {
         'X-Customer-Email': email,
         'X-Customer-Name': `${firstName} ${lastName}`,
-        'X-Submission-Source': 'bruv.co.ke'
+        'X-Submission-Source': 'bruv.africa',
+        'X-Priority': '1',
+        'Importance': 'high'
       }
     };
+
+    console.log('📤 Sending email with options:', {
+      from: mailOptions.from,
+      to: mailOptions.to,
+      subject: mailOptions.subject,
+      replyTo: mailOptions.replyTo
+    });
 
     // Send email
     const info = await transporter.sendMail(mailOptions);
 
-    console.log('✅ Email sent successfully:', info.messageId);
+    console.log('✅ Email sent successfully:', {
+      messageId: info.messageId,
+      response: info.response,
+      accepted: info.accepted,
+      rejected: info.rejected
+    });
     
     return {
       success: true,
       messageId: info.messageId,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      accepted: info.accepted,
+      rejected: info.rejected
     };
 
   } catch (error) {
-    console.error('❌ Email sending failed:', error);
+    console.error('❌ Email sending failed:');
+    console.error('Error name:', error.name);
+    console.error('Error message:', error.message);
+    console.error('Error code:', error.code);
+    console.error('Error stack:', error.stack);
+    
+    // Detailed error analysis
+    let errorType = 'Unknown';
+    let userMessage = 'Failed to send email';
+    
+    if (error.code === 'EAUTH') {
+      errorType = 'Authentication Failed';
+      userMessage = 'Email authentication failed - please check SMTP credentials';
+    } else if (error.code === 'ECONNECTION') {
+      errorType = 'Connection Failed';
+      userMessage = 'Could not connect to email server';
+    } else if (error.code === 'ETIMEDOUT') {
+      errorType = 'Connection Timeout';
+      userMessage = 'Email server connection timed out';
+    } else if (error.message.includes('DNS')) {
+      errorType = 'DNS Resolution Failed';
+      userMessage = 'Could not resolve email server address';
+    } else if (error.message.includes('SMTP')) {
+      errorType = 'SMTP Error';
+      userMessage = 'SMTP server error occurred';
+    }
+
+    console.error(`❌ Error Type: ${errorType}`);
     
     return {
       success: false,
       error: error.message,
-      timestamp: new Date().toISOString()
+      errorType: errorType,
+      userMessage: userMessage,
+      timestamp: new Date().toISOString(),
+      code: error.code || 'UNKNOWN'
+    };
+  }
+};
+
+// Test email function for debugging
+const testEmailConnection = async () => {
+  try {
+    console.log('🧪 Testing email connection...');
+    
+    const transporter = createTransporter();
+    
+    // Test connection
+    await transporter.verify();
+    console.log('✅ Email connection test passed');
+    
+    // Send test email
+    const testMailOptions = {
+      from: `"Bruv Test" <${process.env.SMTP_USER}>`,
+      to: process.env.COMPANY_EMAIL,
+      subject: '🧪 Test Email from Bruv Backend',
+      text: 'This is a test email to verify the email configuration is working correctly.',
+      html: `
+        <h2>🧪 Test Email</h2>
+        <p>This is a test email to verify the email configuration is working correctly.</p>
+        <p><strong>Timestamp:</strong> ${new Date().toISOString()}</p>
+        <p><strong>Environment:</strong> ${process.env.NODE_ENV}</p>
+      `
+    };
+    
+    const info = await transporter.sendMail(testMailOptions);
+    console.log('✅ Test email sent successfully:', info.messageId);
+    
+    return {
+      success: true,
+      messageId: info.messageId,
+      message: 'Test email sent successfully'
+    };
+    
+  } catch (error) {
+    console.error('❌ Email connection test failed:', error);
+    return {
+      success: false,
+      error: error.message,
+      code: error.code
     };
   }
 };
 
 module.exports = {
-  sendContactEmail
+  sendContactEmail,
+  testEmailConnection
 };
