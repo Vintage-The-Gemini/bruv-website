@@ -12,21 +12,29 @@ const createTransporter = () => {
     pass: process.env.SMTP_PASS ? 'SET' : 'NOT SET'
   });
 
+  const port = parseInt(process.env.SMTP_PORT) || 587;
+
   return nodemailer.createTransport({
     host: process.env.SMTP_HOST,
-    port: parseInt(process.env.SMTP_PORT) || 587,
-    secure: process.env.SMTP_PORT == 465, // true for 465, false for other ports
+    port: port,
+    secure: port === 465, // true for 465 (SSL), false for 587 (TLS)
     auth: {
       user: process.env.SMTP_USER,
       pass: process.env.SMTP_PASS,
     },
     tls: {
       rejectUnauthorized: false,
-      ciphers: 'SSLv3'
+      // Remove SSLv3 cipher for port 587
+      ...(port === 587 && { 
+        ciphers: 'TLSv1.2',
+        minVersion: 'TLSv1.2'
+      })
     },
+    requireTLS: port === 587, // Force TLS for port 587
     connectionTimeout: 10000, // 10 seconds
     greetingTimeout: 5000, // 5 seconds
     socketTimeout: 10000, // 10 seconds
+    debug: process.env.NODE_ENV === 'development', // Enable debug in development
   });
 };
 
