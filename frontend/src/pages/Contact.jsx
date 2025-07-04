@@ -6,18 +6,6 @@ import { useTheme } from '../contexts/ThemeContext';
 
 const Contact = () => {
   const { isDarkMode } = useTheme();
-  
-  // DEBUG: Log environment variables on component mount
-  React.useEffect(() => {
-    console.log('🔍 DEBUG: Environment Variables Check');
-    console.log('NODE_ENV:', process.env.NODE_ENV);
-    console.log('REACT_APP_API_URL:', process.env.REACT_APP_API_URL);
-    console.log('All REACT_APP_ vars:', Object.keys(process.env).filter(key => key.startsWith('REACT_APP_')));
-    console.log('Current hostname:', window.location.hostname);
-    console.log('Current protocol:', window.location.protocol);
-    console.log('Full location:', window.location.href);
-    console.log('🔍 ===========================');
-  }, []);
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -66,37 +54,17 @@ const Contact = () => {
   };
 
   const getApiUrl = () => {
-    console.log('🚀 DEBUG: getApiUrl() called');
-    console.log('🚀 REACT_APP_API_URL from env:', process.env.REACT_APP_API_URL);
-    console.log('🚀 typeof REACT_APP_API_URL:', typeof process.env.REACT_APP_API_URL);
-    console.log('🚀 REACT_APP_API_URL length:', process.env.REACT_APP_API_URL?.length);
-    
-    // First priority: Environment variable
-    if (process.env.REACT_APP_API_URL) {
-      console.log('✅ Using REACT_APP_API_URL:', process.env.REACT_APP_API_URL);
-      return process.env.REACT_APP_API_URL;
-    }
-    
-    console.log('⚠️ REACT_APP_API_URL not found, checking environment...');
-    
-    // Production environment detection
+    // Check if we're in development
     const isLocalhost = window.location.hostname === 'localhost' || 
                        window.location.hostname === '127.0.0.1' ||
                        window.location.hostname.includes('192.168');
     
-    console.log('🌍 isLocalhost:', isLocalhost);
-    console.log('🌍 hostname:', window.location.hostname);
-    
-    if (!isLocalhost) {
-      console.log('🏭 Production detected - need to set REACT_APP_API_URL!');
-      // For production, you MUST set the environment variable
-      // This is a fallback that shouldn't be used
-      return 'https://ENVIRONMENT_VARIABLE_NOT_SET.onrender.com';
+    if (isLocalhost) {
+      return 'http://localhost:5000';
     }
     
-    console.log('🛠️ Development environment detected');
-    // Development fallback
-    return 'http://localhost:5000';
+    // Production - your actual backend URL
+    return 'https://bruv-website-backend.onrender.com';
   };
 
   const handleSubmit = async (e) => {
@@ -121,20 +89,12 @@ const Contact = () => {
 
     try {
       const apiUrl = getApiUrl();
-      console.log('📡 Final API URL:', apiUrl);
-      console.log('📡 Submitting to:', `${apiUrl}/api/contact`);
       
       const requestBody = {
         ...formData,
         fullName: `${formData.firstName} ${formData.lastName}`,
         timestamp: new Date().toISOString()
       };
-
-      console.log('📤 Request body:', requestBody);
-      console.log('📤 Request headers will be:', {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      });
       
       const response = await fetch(`${apiUrl}/api/contact`, {
         method: 'POST',
@@ -147,25 +107,18 @@ const Contact = () => {
         body: JSON.stringify(requestBody),
       });
 
-      console.log('📥 Response status:', response.status);
-      console.log('📥 Response ok:', response.ok);
-      console.log('📥 Response headers:', Object.fromEntries(response.headers.entries()));
-
       if (!response.ok) {
         let errorMessage;
         try {
           const errorData = await response.json();
           errorMessage = errorData.message || errorData.error || `Server error: ${response.status}`;
-          console.error('❌ Error response data:', errorData);
         } catch (parseError) {
           errorMessage = `HTTP ${response.status}: ${response.statusText}`;
-          console.error('❌ Failed to parse error response:', parseError);
         }
         throw new Error(errorMessage);
       }
 
       const data = await response.json();
-      console.log('✅ Success response:', data);
 
       // Success
       setFormState({
@@ -192,11 +145,6 @@ const Contact = () => {
       }, 10000);
 
     } catch (error) {
-      console.error('💥 Form submission error:', error);
-      console.error('💥 Error name:', error.name);
-      console.error('💥 Error message:', error.message);
-      console.error('💥 Error stack:', error.stack);
-      
       setFormState({
         isSubmitting: false,
         isSubmitted: false,
@@ -250,15 +198,6 @@ const Contact = () => {
     <div className={`min-h-screen pt-20 ${
       isDarkMode ? 'bg-gray-900' : 'bg-gray-50'
     }`}>
-      {/* Debug Info Panel - Remove this in production */}
-      <div className="fixed top-4 right-4 bg-black text-green-400 p-4 rounded-lg text-xs font-mono z-50 max-w-md">
-        <div className="text-yellow-400 font-bold mb-2">🐛 DEBUG INFO:</div>
-        <div>ENV: {process.env.NODE_ENV}</div>
-        <div>API_URL: {process.env.REACT_APP_API_URL || 'NOT SET'}</div>
-        <div>Hostname: {window.location.hostname}</div>
-        <div>Will use: {getApiUrl()}</div>
-      </div>
-
       {/* Header Section */}
       <div className={`${
         isDarkMode ? 'bg-gray-800' : 'bg-white'
