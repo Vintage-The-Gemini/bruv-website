@@ -1,6 +1,7 @@
-// FILE PATH: src/components/sections/Hero.jsx (Modern Design)
+// FILE PATH: src/components/sections/Hero.jsx (Fixed - Proper Navigation)
 
 import React from "react";
+import { Link } from "react-router-dom";
 import {
   ArrowRight,
   CheckCircle,
@@ -12,6 +13,16 @@ import { useTheme } from "../../contexts/ThemeContext";
 
 const Hero = () => {
   const { isDarkMode } = useTheme();
+
+  const scrollToSection = (sectionId) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }
+  };
 
   return (
     <>
@@ -35,11 +46,6 @@ const Hero = () => {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             {/* Left Content */}
             <div className="text-center lg:text-left mb-16 lg:mb-0">
-              {/* <div className="inline-flex items-center px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/20 text-white text-sm font-medium mb-8">
-                <span className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></span>
-                Precision for your vision
-              </div> */}
-
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight mb-8">
                 Automate Your
                 <br />
@@ -58,16 +64,44 @@ const Hero = () => {
                 controls.
               </p>
 
-              {/* CTA Buttons */}
+              {/* CTA Buttons - Fixed Links */}
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-12">
-                <button className="bg-red-500 hover:bg-red-600 text-white font-semibold px-10 py-4 rounded-xl transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:-translate-y-1 inline-flex items-center justify-center group">
+                <Link 
+                  to="/contact"
+                  className="bg-red-500 hover:bg-red-600 text-white font-semibold px-10 py-4 rounded-xl transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:-translate-y-1 inline-flex items-center justify-center group"
+                >
                   Get Started Free
                   <ArrowRight className="ml-3 w-5 h-5 group-hover:translate-x-1 transition-transform duration-200" />
-                </button>
+                </Link>
 
-                <button className="border-2 border-white/30 text-white hover:bg-white hover:text-gray-900 font-semibold px-10 py-4 rounded-xl transition-all duration-300 backdrop-blur-sm">
+                <Link 
+                  to="/contact"
+                  className="border-2 border-white/30 text-white hover:bg-white hover:text-gray-900 font-semibold px-10 py-4 rounded-xl transition-all duration-300 backdrop-blur-sm"
+                >
                   Book a Demo
+                </Link>
+              </div>
+
+              {/* Quick Links to Sections */}
+              <div className="flex flex-wrap gap-4 justify-center lg:justify-start">
+                <button 
+                  onClick={() => scrollToSection('services')}
+                  className="text-gray-300 hover:text-red-400 text-sm font-medium transition-colors duration-200"
+                >
+                  → View Services
                 </button>
+                <button 
+                  onClick={() => scrollToSection('products')}
+                  className="text-gray-300 hover:text-red-400 text-sm font-medium transition-colors duration-200"
+                >
+                  → Explore Solutions
+                </button>
+                <Link 
+                  to="/about"
+                  className="text-gray-300 hover:text-red-400 text-sm font-medium transition-colors duration-200"
+                >
+                  → About Us
+                </Link>
               </div>
             </div>
 
@@ -214,7 +248,11 @@ const Hero = () => {
               >
                 <div className="flex items-center space-x-2">
                   <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                  
+                  <span className={`text-xs font-medium ${
+                    isDarkMode ? "text-gray-300" : "text-gray-600"
+                  }`}>
+                    Live
+                  </span>
                 </div>
               </div>
             </div>
@@ -235,35 +273,35 @@ const Hero = () => {
         </div>
       </section>
 
-      {/* Trust Section */}
+      {/* Trust Section - Simplified */}
       <section className={`py-16 ${isDarkMode ? "bg-gray-900" : "bg-white"}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <p
               className={`text-sm font-medium mb-8 ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}
             >
-              In partnership with:
+              Trusted by organizations worldwide
             </p>
             <div className="flex items-center justify-center space-x-12 lg:space-x-16 flex-wrap gap-8">
               <div
-                className={`text-2xl lg:text-3xl font-bold ${isDarkMode ? "text-gray-300" : "text-gray-700"} hover:text-red-500 transition-colors duration-300 cursor-pointer`}
+                className={`text-2xl lg:text-3xl font-bold ${isDarkMode ? "text-gray-300" : "text-gray-700"} hover:text-red-500 transition-colors duration-300`}
               >
-                Microsoft
+                Enterprise
               </div>
               <div
-                className={`text-2xl lg:text-3xl font-bold ${isDarkMode ? "text-gray-300" : "text-gray-700"} hover:text-red-500 transition-colors duration-300 cursor-pointer`}
+                className={`text-2xl lg:text-3xl font-bold ${isDarkMode ? "text-gray-300" : "text-gray-700"} hover:text-red-500 transition-colors duration-300`}
               >
-                Google
+                SME
               </div>
               <div
-                className={`text-2xl lg:text-3xl font-bold ${isDarkMode ? "text-gray-300" : "text-gray-700"} hover:text-red-500 transition-colors duration-300 cursor-pointer`}
+                className={`text-2xl lg:text-3xl font-bold ${isDarkMode ? "text-gray-300" : "text-gray-700"} hover:text-red-500 transition-colors duration-300`}
               >
-                Amazon
+                Startups
               </div>
               <div
-                className={`text-2xl lg:text-3xl font-bold ${isDarkMode ? "text-gray-300" : "text-gray-700"} hover:text-red-500 transition-colors duration-300 cursor-pointer`}
+                className={`text-2xl lg:text-3xl font-bold ${isDarkMode ? "text-gray-300" : "text-gray-700"} hover:text-red-500 transition-colors duration-300`}
               >
-                IBM
+                Government
               </div>
             </div>
           </div>

@@ -1,7 +1,7 @@
-// FILE PATH: src/pages/Contact.jsx - Consistent Color Palette
+// FILE PATH: src/pages/Contact.jsx (Enhanced with Email Functionality)
 
 import React, { useState } from 'react';
-import { Mail, Phone, MapPin, Clock, Send, CheckCircle } from 'lucide-react';
+import { Mail, Phone, MapPin, Clock, Send, CheckCircle, AlertCircle, Loader } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 
 const Contact = () => {
@@ -17,34 +17,116 @@ const Contact = () => {
     serviceInterest: ''
   });
 
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [formState, setFormState] = useState({
+    isSubmitting: false,
+    isSubmitted: false,
+    error: null
+  });
 
   const handleChange = (e) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
     });
+    // Clear any previous errors when user starts typing
+    if (formState.error) {
+      setFormState(prev => ({ ...prev, error: null }));
+    }
   };
 
-  const handleSubmit = (e) => {
+  const validateForm = () => {
+    const errors = [];
+    
+    if (!formData.firstName.trim()) errors.push('First name is required');
+    if (!formData.lastName.trim()) errors.push('Last name is required');
+    if (!formData.email.trim()) errors.push('Email is required');
+    if (!formData.subject.trim()) errors.push('Subject is required');
+    if (!formData.message.trim()) errors.push('Message is required');
+    
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (formData.email && !emailRegex.test(formData.email)) {
+      errors.push('Please enter a valid email address');
+    }
+
+    return errors;
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle form submission logic here
-    console.log('Form submitted:', formData);
-    setIsSubmitted(true);
-    // Reset form after 3 seconds
-    setTimeout(() => {
-      setIsSubmitted(false);
-      setFormData({
-        firstName: '',
-        lastName: '',
-        email: '',
-        company: '',
-        phone: '',
-        subject: '',
-        message: '',
-        serviceInterest: ''
+    
+    // Validate form
+    const errors = validateForm();
+    if (errors.length > 0) {
+      setFormState({
+        isSubmitting: false,
+        isSubmitted: false,
+        error: errors.join(', ')
       });
-    }, 3000);
+      return;
+    }
+
+    setFormState({
+      isSubmitting: true,
+      isSubmitted: false,
+      error: null
+    });
+
+    try {
+      // Call your email API endpoint
+      const apiUrl = process.env.REACT_APP_API_URL || '';
+      const response = await fetch(`${apiUrl}/api/contact`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...formData,
+          fullName: `${formData.firstName} ${formData.lastName}`,
+          timestamp: new Date().toISOString()
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      
+      if (result.success) {
+        setFormState({
+          isSubmitting: false,
+          isSubmitted: true,
+          error: null
+        });
+        
+        // Reset form
+        setFormData({
+          firstName: '',
+          lastName: '',
+          email: '',
+          company: '',
+          phone: '',
+          subject: '',
+          message: '',
+          serviceInterest: ''
+        });
+
+        // Reset success state after 5 seconds
+        setTimeout(() => {
+          setFormState(prev => ({ ...prev, isSubmitted: false }));
+        }, 5000);
+      } else {
+        throw new Error(result.message || 'Failed to send message');
+      }
+    } catch (error) {
+      console.error('Form submission error:', error);
+      setFormState({
+        isSubmitting: false,
+        isSubmitted: false,
+        error: error.message || 'Failed to send message. Please try again or contact us directly.'
+      });
+    }
   };
 
   const contactInfo = [
@@ -63,7 +145,7 @@ const Contact = () => {
     {
       icon: MapPin,
       title: "Visit Us",
-      details: ["Jumia place, kilimani, Nairobi"],
+      details: ["Jumuia place, kilimani, Nairobi"],
       action: "Schedule an appointment"
     },
     {
@@ -85,17 +167,8 @@ const Contact = () => {
     "Other"
   ];
 
-  // Single Kenyan office
-  const office = {
-    city: "Nairobi",
-    address: "Jumuia place,Kilimani, Nairobi 00100",
-    phone: "+254 701 234 567",
-    email: "nairobi@bruv.co.ke",
-    county: "Nairobi County",
-    country: "Kenya"
-  };
-
-  if (isSubmitted) {
+  // Success state
+  if (formState.isSubmitted) {
     return (
       <div className={`min-h-screen flex items-center justify-center ${
         isDarkMode ? 'bg-gray-900' : 'bg-gray-50'
@@ -112,10 +185,25 @@ const Contact = () => {
           <p className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>
             Your message has been sent successfully. We'll get back to you within 24 hours.
           </p>
+          <button 
+            onClick={() => setFormState(prev => ({ ...prev, isSubmitted: false }))}
+            className="mt-6 text-red-500 hover:text-red-600 font-medium"
+          >
+            Send Another Message
+          </button>
         </div>
       </div>
     );
   }
+
+  const office = {
+    city: "Nairobi",
+    address: "Jumuia place,Kilimani, Nairobi 00100",
+    phone: "+254 701 234 567",
+    email: "nairobi@bruv.co.ke",
+    county: "Nairobi County",
+    country: "Kenya"
+  };
 
   return (
     <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900' : 'bg-white'}`}>
@@ -189,6 +277,17 @@ const Contact = () => {
                 }`} style={{color: isDarkMode ? 'white' : '#2D1B69'}}>
                   Send us a Message
                 </h2>
+
+                {/* Error Message */}
+                {formState.error && (
+                  <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start">
+                    <AlertCircle className="w-5 h-5 text-red-500 mr-3 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="text-red-700 text-sm font-medium">Error sending message</p>
+                      <p className="text-red-600 text-sm">{formState.error}</p>
+                    </div>
+                  </div>
+                )}
                 
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="grid md:grid-cols-2 gap-6">
@@ -203,11 +302,12 @@ const Contact = () => {
                         name="firstName"
                         value={formData.firstName}
                         onChange={handleChange}
+                        disabled={formState.isSubmitting}
                         className={`w-full px-4 py-3 border rounded-lg transition-colors duration-200 ${
                           isDarkMode 
                             ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-red-500 focus:ring-red-500/20' 
                             : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-red-500 focus:ring-red-500/20'
-                        } focus:ring-2 focus:outline-none`}
+                        } focus:ring-2 focus:outline-none disabled:opacity-50`}
                         required
                       />
                     </div>
@@ -222,11 +322,12 @@ const Contact = () => {
                         name="lastName"
                         value={formData.lastName}
                         onChange={handleChange}
+                        disabled={formState.isSubmitting}
                         className={`w-full px-4 py-3 border rounded-lg transition-colors duration-200 ${
                           isDarkMode 
                             ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-red-500 focus:ring-red-500/20' 
                             : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-red-500 focus:ring-red-500/20'
-                        } focus:ring-2 focus:outline-none`}
+                        } focus:ring-2 focus:outline-none disabled:opacity-50`}
                         required
                       />
                     </div>
@@ -244,11 +345,12 @@ const Contact = () => {
                         name="email"
                         value={formData.email}
                         onChange={handleChange}
+                        disabled={formState.isSubmitting}
                         className={`w-full px-4 py-3 border rounded-lg transition-colors duration-200 ${
                           isDarkMode 
                             ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-red-500 focus:ring-red-500/20' 
                             : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-red-500 focus:ring-red-500/20'
-                        } focus:ring-2 focus:outline-none`}
+                        } focus:ring-2 focus:outline-none disabled:opacity-50`}
                         required
                       />
                     </div>
@@ -263,12 +365,13 @@ const Contact = () => {
                         name="phone"
                         value={formData.phone}
                         onChange={handleChange}
+                        disabled={formState.isSubmitting}
                         placeholder="+254 7XX XXX XXX"
                         className={`w-full px-4 py-3 border rounded-lg transition-colors duration-200 ${
                           isDarkMode 
                             ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-red-500 focus:ring-red-500/20' 
                             : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-red-500 focus:ring-red-500/20'
-                        } focus:ring-2 focus:outline-none`}
+                        } focus:ring-2 focus:outline-none disabled:opacity-50`}
                       />
                     </div>
                   </div>
@@ -285,11 +388,12 @@ const Contact = () => {
                         name="company"
                         value={formData.company}
                         onChange={handleChange}
+                        disabled={formState.isSubmitting}
                         className={`w-full px-4 py-3 border rounded-lg transition-colors duration-200 ${
                           isDarkMode 
                             ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-red-500 focus:ring-red-500/20' 
                             : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-red-500 focus:ring-red-500/20'
-                        } focus:ring-2 focus:outline-none`}
+                        } focus:ring-2 focus:outline-none disabled:opacity-50`}
                       />
                     </div>
                     <div>
@@ -302,11 +406,12 @@ const Contact = () => {
                         name="serviceInterest"
                         value={formData.serviceInterest}
                         onChange={handleChange}
+                        disabled={formState.isSubmitting}
                         className={`w-full px-4 py-3 border rounded-lg transition-colors duration-200 ${
                           isDarkMode 
                             ? 'bg-gray-700 border-gray-600 text-white focus:border-red-500 focus:ring-red-500/20' 
                             : 'bg-white border-gray-300 text-gray-900 focus:border-red-500 focus:ring-red-500/20'
-                        } focus:ring-2 focus:outline-none`}
+                        } focus:ring-2 focus:outline-none disabled:opacity-50`}
                       >
                         <option value="">Select a service...</option>
                         {serviceOptions.map((service, index) => (
@@ -327,11 +432,12 @@ const Contact = () => {
                       name="subject"
                       value={formData.subject}
                       onChange={handleChange}
+                      disabled={formState.isSubmitting}
                       className={`w-full px-4 py-3 border rounded-lg transition-colors duration-200 ${
                         isDarkMode 
                           ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-red-500 focus:ring-red-500/20' 
                           : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-red-500 focus:ring-red-500/20'
-                      } focus:ring-2 focus:outline-none`}
+                      } focus:ring-2 focus:outline-none disabled:opacity-50`}
                       required
                     />
                   </div>
@@ -347,27 +453,38 @@ const Contact = () => {
                       name="message"
                       value={formData.message}
                       onChange={handleChange}
+                      disabled={formState.isSubmitting}
                       className={`w-full px-4 py-3 border rounded-lg transition-colors duration-200 ${
                         isDarkMode 
                           ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-red-500 focus:ring-red-500/20' 
                           : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-red-500 focus:ring-red-500/20'
-                      } focus:ring-2 focus:outline-none`}
+                      } focus:ring-2 focus:outline-none disabled:opacity-50`}
                       required
                     ></textarea>
                   </div>
                   
                   <button 
                     type="submit" 
-                    className="w-full bg-red-500 hover:bg-red-600 text-white font-medium py-3 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl inline-flex items-center justify-center"
+                    disabled={formState.isSubmitting}
+                    className="w-full bg-red-500 hover:bg-red-600 disabled:bg-red-300 text-white font-medium py-3 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl inline-flex items-center justify-center disabled:cursor-not-allowed"
                   >
-                    <Send className="mr-2 w-5 h-5" />
-                    Send Message
+                    {formState.isSubmitting ? (
+                      <>
+                        <Loader className="mr-2 w-5 h-5 animate-spin" />
+                        Sending Message...
+                      </>
+                    ) : (
+                      <>
+                        <Send className="mr-2 w-5 h-5" />
+                        Send Message
+                      </>
+                    )}
                   </button>
                 </form>
               </div>
             </div>
 
-            {/* Office Location */}
+            {/* Office Location and Info */}
             <div>
               <h2 className={`text-2xl font-bold mb-6 ${
                 isDarkMode ? 'text-white' : ''

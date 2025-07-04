@@ -1,6 +1,7 @@
-// FILE PATH: src/components/sections/Services.jsx (With Dark Mode - Complete)
+// FILE PATH: src/components/sections/Services.jsx (Fixed - Proper Navigation)
 
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { BarChart3, Shield, CheckCircle, Target, ArrowRight } from 'lucide-react';
 import { useTheme } from '../../contexts/ThemeContext';
 
@@ -12,31 +13,54 @@ const Services = () => {
       icon: BarChart3,
       title: "Project Management",
       description: "From concept to completion, we bring structure, clarity, and control to your projects with tailored methodologies.",
-      features: ["Agile & Waterfall methodologies", "Risk mitigation", "Stakeholder engagement", "Budget control"]
+      features: ["Agile & Waterfall methodologies", "Risk mitigation", "Stakeholder engagement", "Budget control"],
+      linkTo: "/services",
+      hash: "project-management"
     },
     {
       icon: Shield,
       title: "Information System Audit",
       description: "Comprehensive evaluation of your IT systems against industry standards to uncover vulnerabilities and inefficiencies.",
-      features: ["Security assessments", "Compliance reviews", "Infrastructure audits", "Disaster recovery"]
+      features: ["Security assessments", "Compliance reviews", "Infrastructure audits", "Disaster recovery"],
+      linkTo: "/services",
+      hash: "is-audit"
     },
     {
       icon: CheckCircle,
       title: "Quality Assurance",
       description: "Comprehensive testing strategies including manual, automated, regression, and performance testing.",
-      features: ["Manual & automated testing", "Performance testing", "Security testing", "User acceptance testing"]
+      features: ["Manual & automated testing", "Performance testing", "Security testing", "User acceptance testing"],
+      linkTo: "/services",
+      hash: "qa-services"
     },
     {
       icon: Target,
       title: "Risk & Compliance",
       description: "Build robust frameworks that align with legal and industry standards while managing operational risks.",
-      features: ["Risk assessment", "Compliance frameworks", "Policy development", "Training programs"]
+      features: ["Risk assessment", "Compliance frameworks", "Policy development", "Training programs"],
+      linkTo: "/services",
+      hash: "risk-advisory"
     }
   ];
 
+  const handleServiceClick = (linkTo, hash) => {
+    // Navigate to services page and scroll to specific section
+    if (hash) {
+      setTimeout(() => {
+        const element = document.getElementById(hash);
+        if (element) {
+          element.scrollIntoView({ 
+            behavior: 'smooth',
+            block: 'start'
+          });
+        }
+      }, 300);
+    }
+  };
+
   return (
     <section id="services" className={`py-20 ${isDarkMode ? 'bg-gray-900' : 'bg-white'}`}>
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className={`text-3xl md:text-4xl font-bold mb-4 ${
             isDarkMode ? 'text-white' : ''
@@ -90,10 +114,14 @@ const Services = () => {
               </ul>
               
               <div className="mt-4">
-                <a href="#" className="text-red-500 font-medium text-sm hover:text-red-600 transition-colors duration-200 inline-flex items-center">
+                <Link 
+                  to={service.linkTo}
+                  onClick={() => handleServiceClick(service.linkTo, service.hash)}
+                  className="text-red-500 font-medium text-sm hover:text-red-600 transition-colors duration-200 inline-flex items-center"
+                >
                   Learn More
                   <ArrowRight className="w-4 h-4 ml-1" />
-                </a>
+                </Link>
               </div>
             </div>
           ))}

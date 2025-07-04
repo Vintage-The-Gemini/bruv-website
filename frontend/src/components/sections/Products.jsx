@@ -1,6 +1,7 @@
-// FILE PATH: src/components/sections/Products.jsx (With Dark Mode)
+// FILE PATH: src/components/sections/Products.jsx (Fixed - Proper Navigation)
 
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { CheckCircle } from 'lucide-react';
 import { useTheme } from '../../contexts/ThemeContext';
 
@@ -13,27 +14,48 @@ const Products = () => {
       subtitle: "Plan. Track. Succeed.",
       description: "Powerful features like task assignment, timeline tracking, Gantt charts, and real-time collaboration in one central dashboard.",
       icon: "📊",
-      features: ["Task Management", "Gantt Charts", "Team Collaboration", "Progress Tracking"]
+      features: ["Task Management", "Gantt Charts", "Team Collaboration", "Progress Tracking"],
+      linkTo: "/solutions",
+      hash: "project-management"
     },
     {
       title: "Bruv Audit Management Software",
       subtitle: "Audit Smarter, Not Harder.",
       description: "Streamline audit processes with built-in templates, automated scheduling, and real-time dashboards for full visibility.",
       icon: "🛡",
-      features: ["Audit Planning", "Finding Tracking", "Report Generation", "Compliance Monitoring"]
+      features: ["Audit Planning", "Finding Tracking", "Report Generation", "Compliance Monitoring"],
+      linkTo: "/solutions",
+      hash: "audit-management"
     },
     {
       title: "Bruv Risk & Compliance Management Software",
       subtitle: "Stay Ahead of Risk.",
       description: "Proactively identify, assess, and respond to risk across the enterprise with intelligent automation.",
       icon: "⚙",
-      features: ["Risk Assessment", "Compliance Controls", "Dynamic Dashboards", "Regulatory Updates"]
+      features: ["Risk Assessment", "Compliance Controls", "Dynamic Dashboards", "Regulatory Updates"],
+      linkTo: "/solutions",
+      hash: "risk-compliance"
     }
   ];
 
+  const handleProductClick = (linkTo, hash) => {
+    // Navigate to solutions page and scroll to specific section
+    if (hash) {
+      setTimeout(() => {
+        const element = document.getElementById(hash);
+        if (element) {
+          element.scrollIntoView({ 
+            behavior: 'smooth',
+            block: 'start'
+          });
+        }
+      }, 300);
+    }
+  };
+
   return (
     <section 
-      id="solutions" 
+      id="products" 
       className={`py-20 ${
         isDarkMode ? 'bg-gray-800' : 'bg-gray-50'
       }`}
@@ -87,9 +109,13 @@ const Products = () => {
                 ))}
               </div>
               
-              <button className="w-full bg-red-500 hover:bg-red-600 text-white font-medium py-3 rounded-lg transition-all duration-200">
+              <Link 
+                to={product.linkTo}
+                onClick={() => handleProductClick(product.linkTo, product.hash)}
+                className="w-full bg-red-500 hover:bg-red-600 text-white font-medium py-3 rounded-lg transition-all duration-200 block text-center"
+              >
                 Learn More
-              </button>
+              </Link>
             </div>
           ))}
         </div>

@@ -1,7 +1,8 @@
-// FILE PATH: src/components/layout/Footer.jsx (Logo Only - Larger Size)
+// FILE PATH: src/components/layout/Footer.jsx (Fixed - Removed Dead Links)
 
 import React from 'react';
-import { Twitter, Linkedin, Facebook } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Twitter, Linkedin, Facebook, Mail, Phone, MapPin } from 'lucide-react';
 import { useTheme } from '../../contexts/ThemeContext';
 // Import your logo
 import bruvLogo from '../../assets/images/bruv-01.png';
@@ -13,43 +14,49 @@ const Footer = () => {
     {
       title: "Solutions",
       links: [
-        { name: "Project Management", href: "#" },
-        { name: "Audit Tracking", href: "#" },
-        { name: "Risk & Compliance", href: "#" },
-        { name: "Quality Assurance", href: "#" }
+        { name: "Project Management Software", to: "/solutions", hash: "project-management" },
+        { name: "Audit Management Software", to: "/solutions", hash: "audit-management" },
+        { name: "Risk & Compliance Software", to: "/solutions", hash: "risk-compliance" }
       ]
     },
     {
       title: "Services",
       links: [
-        { name: "IS Audit", href: "#" },
-        { name: "Tech Project Management", href: "#" },
-        { name: "Risk Advisory", href: "#" },
-        { name: "Escrow Services", href: "#" }
+        { name: "Project Management Services", to: "/services", hash: "project-management" },
+        { name: "Information Systems Audit", to: "/services", hash: "is-audit" },
+        { name: "Quality Assurance Services", to: "/services", hash: "qa-services" },
+        { name: "Risk & Compliance Advisory", to: "/services", hash: "risk-advisory" }
       ]
     },
     {
       title: "Company",
       links: [
-        { name: "About Us", href: "#" },
-        { name: "Careers", href: "#" },
-        { name: "Blog", href: "#" },
-        { name: "Contact", href: "#" }
+        { name: "About Us", to: "/about" },
+        { name: "Contact", to: "/contact" }
       ]
     }
   ];
 
-  const socialLinks = [
-    { icon: Twitter, href: "#", label: "Twitter" },
-    { icon: Linkedin, href: "#", label: "LinkedIn" },
-    { icon: Facebook, href: "#", label: "Facebook" }
+  const contactInfo = [
+    { icon: Mail, text: "hello@bruv.co.ke", href: "mailto:hello@bruv.co.ke" },
+    { icon: Phone, text: "+254 701 234 567", href: "tel:+254701234567" },
+    { icon: MapPin, text: "Jumuia Place, Kilimani, Nairobi", href: "#" }
   ];
 
-  const legalLinks = [
-    { name: "Privacy Policy", href: "#" },
-    { name: "Terms of Service", href: "#" },
-    { name: "Cookie Policy", href: "#" }
-  ];
+  const handleLinkClick = (to, hash) => {
+    if (hash) {
+      // Navigate to page first, then scroll to section after a delay
+      setTimeout(() => {
+        const element = document.getElementById(hash);
+        if (element) {
+          element.scrollIntoView({ 
+            behavior: 'smooth',
+            block: 'start'
+          });
+        }
+      }, 300);
+    }
+  };
 
   return (
     <footer 
@@ -60,18 +67,18 @@ const Footer = () => {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
-          {/* Brand Section with Logo Only */}
+          {/* Brand Section with Logo and Contact */}
           <div>
-            {/* Logo Only - Larger Size */}
+            {/* Logo */}
             <div className="mb-6">
-              <div className="flex items-center justify-start">
+              <Link to="/" className="flex items-center justify-start">
                 <img 
                   src={bruvLogo} 
                   alt="Bruv Logo" 
                   className="object-contain filter brightness-0 invert transition-all duration-300 hover:scale-105"
                   style={{width: '100px', height: '100px', minWidth: '100px', minHeight: '100px'}}
                 />
-              </div>
+              </Link>
             </div>
             
             <p className={`mb-6 ${
@@ -80,21 +87,60 @@ const Footer = () => {
               Precision for your vision. Empowering organizations with confidence through 
               comprehensive control solutions.
             </p>
-            <div className="flex space-x-4">
-              {socialLinks.map((social, index) => (
-                <a 
-                  key={index}
-                  href={social.href} 
-                  className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors duration-200 ${
-                    isDarkMode 
-                      ? 'bg-gray-800 hover:bg-gray-700' 
-                      : 'bg-white/10 hover:bg-white/20'
-                  }`}
-                  aria-label={social.label}
-                >
-                  <social.icon className="w-4 h-4 text-white" />
-                </a>
+
+            {/* Contact Information */}
+            <div className="space-y-3 mb-6">
+              {contactInfo.map((contact, index) => (
+                <div key={index} className="flex items-center">
+                  <contact.icon className="w-4 h-4 text-red-500 mr-3 flex-shrink-0" />
+                  {contact.href === "#" ? (
+                    <span className={`text-sm ${
+                      isDarkMode ? 'text-gray-400' : 'text-gray-300'
+                    }`}>
+                      {contact.text}
+                    </span>
+                  ) : (
+                    <a 
+                      href={contact.href}
+                      className={`text-sm transition-colors duration-200 ${
+                        isDarkMode 
+                          ? 'text-gray-400 hover:text-white' 
+                          : 'text-gray-300 hover:text-white'
+                      }`}
+                    >
+                      {contact.text}
+                    </a>
+                  )}
+                </div>
               ))}
+            </div>
+
+            {/* Social Links - Only include if you have actual social media accounts */}
+            <div className="flex space-x-4">
+              <a 
+                href="mailto:hello@bruv.co.ke" 
+                className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors duration-200 ${
+                  isDarkMode 
+                    ? 'bg-gray-800 hover:bg-gray-700' 
+                    : 'bg-white/10 hover:bg-white/20'
+                }`}
+                aria-label="Email"
+              >
+                <Mail className="w-4 h-4 text-white" />
+              </a>
+              {/* Only add social media links if you actually have accounts
+              <a 
+                href="#" 
+                className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors duration-200 ${
+                  isDarkMode 
+                    ? 'bg-gray-800 hover:bg-gray-700' 
+                    : 'bg-white/10 hover:bg-white/20'
+                }`}
+                aria-label="LinkedIn"
+              >
+                <Linkedin className="w-4 h-4 text-white" />
+              </a>
+              */}
             </div>
           </div>
           
@@ -105,8 +151,9 @@ const Footer = () => {
               <ul className="space-y-2">
                 {section.links.map((link, linkIndex) => (
                   <li key={linkIndex}>
-                    <a 
-                      href={link.href} 
+                    <Link 
+                      to={link.to}
+                      onClick={() => handleLinkClick(link.to, link.hash)}
                       className={`transition-colors duration-200 ${
                         isDarkMode 
                           ? 'text-gray-400 hover:text-white' 
@@ -114,7 +161,7 @@ const Footer = () => {
                       }`}
                     >
                       {link.name}
-                    </a>
+                    </Link>
                   </li>
                 ))}
               </ul>
@@ -133,19 +180,26 @@ const Footer = () => {
               © 2025 Bruv. All rights reserved.
             </p>
             <div className="flex space-x-6 mt-4 md:mt-0">
-              {legalLinks.map((link, index) => (
-                <a 
-                  key={index}
-                  href={link.href} 
-                  className={`text-sm transition-colors duration-200 ${
-                    isDarkMode 
-                      ? 'text-gray-400 hover:text-white' 
-                      : 'text-gray-300 hover:text-white'
-                  }`}
-                >
-                  {link.name}
-                </a>
-              ))}
+              <Link 
+                to="/contact"
+                className={`text-sm transition-colors duration-200 ${
+                  isDarkMode 
+                    ? 'text-gray-400 hover:text-white' 
+                    : 'text-gray-300 hover:text-white'
+                }`}
+              >
+                Privacy Policy
+              </Link>
+              <Link 
+                to="/contact"
+                className={`text-sm transition-colors duration-200 ${
+                  isDarkMode 
+                    ? 'text-gray-400 hover:text-white' 
+                    : 'text-gray-300 hover:text-white'
+                }`}
+              >
+                Terms of Service
+              </Link>
             </div>
           </div>
         </div>

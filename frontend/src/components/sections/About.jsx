@@ -1,6 +1,7 @@
-// FILE PATH: src/components/sections/About.jsx (With Dark Mode - Stats Removed)
+// FILE PATH: src/components/sections/About.jsx (Fixed - Proper Navigation)
 
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { CheckCircle } from 'lucide-react';
 import { useTheme } from '../../contexts/ThemeContext';
 
@@ -42,9 +43,12 @@ const About = () => {
             ))}
           </div>
           
-          <button className="bg-red-500 hover:bg-red-600 text-white font-medium px-8 py-3 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl">
+          <Link 
+            to="/about"
+            className="bg-red-500 hover:bg-red-600 text-white font-medium px-8 py-3 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl"
+          >
             Learn About Our Story
-          </button>
+          </Link>
         </div>
       </div>
     </section>
