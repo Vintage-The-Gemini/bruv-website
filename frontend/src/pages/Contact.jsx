@@ -1,4 +1,4 @@
-// FILE PATH: src/pages/Contact.jsx (Enhanced with Email Functionality)
+// FILE PATH: src/pages/Contact.jsx (Enhanced with Email Functionality - FIXED)
 
 import React, { useState } from 'react';
 import { Mail, Phone, MapPin, Clock, Send, CheckCircle, AlertCircle, Loader } from 'lucide-react';
@@ -73,8 +73,13 @@ const Contact = () => {
     });
 
     try {
-      // Call your email API endpoint
-      const apiUrl = process.env.REACT_APP_API_URL || '';
+      // FIXED: Safe environment variable access
+      const apiUrl = (typeof process !== 'undefined' && process.env?.REACT_APP_API_URL) 
+        ? process.env.REACT_APP_API_URL 
+        : 'http://localhost:5000';
+      
+      console.log('Submitting to:', `${apiUrl}/api/contact`); // Debug log
+      
       const response = await fetch(`${apiUrl}/api/contact`, {
         method: 'POST',
         headers: {
@@ -87,480 +92,454 @@ const Contact = () => {
         }),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error(data.message || `HTTP error! status: ${response.status}`);
       }
 
-      const result = await response.json();
-      
-      if (result.success) {
-        setFormState({
-          isSubmitting: false,
-          isSubmitted: true,
-          error: null
-        });
-        
-        // Reset form
-        setFormData({
-          firstName: '',
-          lastName: '',
-          email: '',
-          company: '',
-          phone: '',
-          subject: '',
-          message: '',
-          serviceInterest: ''
-        });
+      // Success
+      setFormState({
+        isSubmitting: false,
+        isSubmitted: true,
+        error: null
+      });
 
-        // Reset success state after 5 seconds
-        setTimeout(() => {
-          setFormState(prev => ({ ...prev, isSubmitted: false }));
-        }, 5000);
-      } else {
-        throw new Error(result.message || 'Failed to send message');
-      }
+      // Reset form after successful submission
+      setFormData({
+        firstName: '',
+        lastName: '',
+        email: '',
+        company: '',
+        phone: '',
+        subject: '',
+        message: '',
+        serviceInterest: ''
+      });
+
+      // Auto-hide success message after 10 seconds
+      setTimeout(() => {
+        setFormState(prev => ({ ...prev, isSubmitted: false }));
+      }, 10000);
+
     } catch (error) {
       console.error('Form submission error:', error);
       setFormState({
         isSubmitting: false,
         isSubmitted: false,
-        error: error.message || 'Failed to send message. Please try again or contact us directly.'
+        error: error.message || 'Failed to send message. Please try again.'
       });
     }
   };
 
-  const contactInfo = [
-    {
-      icon: Mail,
-      title: "Email Us",
-      details: ["hello@bruv.co.ke", "support@bruv.co.ke"],
-      action: "Send us an email anytime"
-    },
-    {
-      icon: Phone,
-      title: "Call Us",
-      details: ["+254 701 234 567", "+254 722 345 678"],
-      action: "Available Mon-Fri, 8AM-6PM EAT"
-    },
-    {
-      icon: MapPin,
-      title: "Visit Us",
-      details: ["Jumuia place, kilimani, Nairobi"],
-      action: "Schedule an appointment"
-    },
-    {
-      icon: Clock,
-      title: "Business Hours",
-      details: ["Monday - Friday: 8:00 AM - 6:00 PM", "Saturday: 9:00 AM - 1:00 PM"],
-      action: "East Africa Time (EAT)"
-    }
-  ];
+  const resetForm = () => {
+    setFormState({
+      isSubmitting: false,
+      isSubmitted: false,
+      error: null
+    });
+  };
 
-  const serviceOptions = [
-    "Project Management Services",
-    "Information Systems Audit", 
-    "Quality Assurance Services",
-    "Risk & Compliance Advisory",
-    "Project Management Software",
-    "Internal Audit Management Software",
-    "Risk & Compliance Management Software",
-    "Other"
-  ];
-
-  // Success state
+  // Success message component
   if (formState.isSubmitted) {
     return (
-      <div className={`min-h-screen flex items-center justify-center ${
+      <div className={`min-h-screen pt-20 ${
         isDarkMode ? 'bg-gray-900' : 'bg-gray-50'
       }`}>
-        <div className={`max-w-md mx-auto text-center p-8 rounded-xl ${
-          isDarkMode ? 'bg-gray-800' : 'bg-white'
-        } shadow-lg`}>
-          <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-6" />
-          <h2 className={`text-2xl font-bold mb-4 ${
-            isDarkMode ? 'text-white' : ''
-          }`} style={{color: isDarkMode ? 'white' : '#2D1B69'}}>
-            Asante Sana!
-          </h2>
-          <p className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>
-            Your message has been sent successfully. We'll get back to you within 24 hours.
-          </p>
-          <button 
-            onClick={() => setFormState(prev => ({ ...prev, isSubmitted: false }))}
-            className="mt-6 text-red-500 hover:text-red-600 font-medium"
-          >
-            Send Another Message
-          </button>
+        <div className="max-w-2xl mx-auto px-4 py-20 text-center">
+          <div className={`${
+            isDarkMode ? 'bg-gray-800' : 'bg-white'
+          } rounded-xl shadow-xl p-12`}>
+            <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-6" />
+            <h2 className={`text-3xl font-bold mb-4 ${
+              isDarkMode ? 'text-white' : 'text-gray-900'
+            }`}>
+              Message Sent Successfully!
+            </h2>
+            <p className={`text-lg mb-8 ${
+              isDarkMode ? 'text-gray-300' : 'text-gray-600'
+            }`}>
+              Thank you for contacting us. We'll get back to you within 24 hours.
+            </p>
+            <button
+              onClick={resetForm}
+              className="bg-red-500 hover:bg-red-600 text-white px-8 py-3 rounded-lg font-medium transition-colors duration-200"
+            >
+              Send Another Message
+            </button>
+          </div>
         </div>
       </div>
     );
   }
 
-  const office = {
-    city: "Nairobi",
-    address: "Jumuia place,Kilimani, Nairobi 00100",
-    phone: "+254 701 234 567",
-    email: "nairobi@bruv.co.ke",
-    county: "Nairobi County",
-    country: "Kenya"
-  };
-
   return (
-    <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900' : 'bg-white'}`}>
-      {/* Hero Section */}
-      <section className={`pt-24 pb-16 ${
-        isDarkMode ? 'bg-gray-800' : ''
-      }`} style={{backgroundColor: isDarkMode ? '' : '#2D1B69'}}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className={`min-h-screen pt-20 ${
+      isDarkMode ? 'bg-gray-900' : 'bg-gray-50'
+    }`}>
+      {/* Header Section */}
+      <div className={`${
+        isDarkMode ? 'bg-gray-800' : 'bg-white'
+      } shadow-sm`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="text-center">
             <h1 className={`text-4xl md:text-5xl font-bold mb-6 ${
-              isDarkMode ? 'text-white' : 'text-white'
+              isDarkMode ? 'text-white' : 'text-gray-900'
             }`}>
-              Get in <span className="text-red-500">Touch</span>
+              Get In Touch
             </h1>
             <p className={`text-xl max-w-3xl mx-auto ${
-              isDarkMode ? 'text-gray-300' : 'text-gray-300'
+              isDarkMode ? 'text-gray-300' : 'text-gray-600'
             }`}>
-              Ready to transform your organization's operational control? We're here to help. 
-              Contact us today to discuss your specific needs and learn how Bruv can make a difference.
+              Ready to transform your organization with intelligent automation? 
+              Let's discuss how we can help you achieve your goals.
             </p>
           </div>
         </div>
-      </section>
+      </div>
 
-      {/* Contact Methods */}
-      <section className={`py-16 ${isDarkMode ? 'bg-gray-900' : 'bg-white'}`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
-            {contactInfo.map((info, index) => (
-              <div 
-                key={index}
-                className={`text-center p-6 rounded-xl ${
-                  isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-100'
-                } border hover:shadow-lg transition-all duration-300 hover:-translate-y-1`}
-              >
-                <div className={`w-16 h-16 mx-auto mb-4 ${
-                  isDarkMode ? 'bg-red-900/20' : 'bg-red-100'
-                } rounded-full flex items-center justify-center`}>
-                  <info.icon className="w-8 h-8 text-red-500" />
+      {/* Contact Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="grid lg:grid-cols-2 gap-16">
+          {/* Contact Information */}
+          <div>
+            <h2 className={`text-3xl font-bold mb-8 ${
+              isDarkMode ? 'text-white' : 'text-gray-900'
+            }`}>
+              Let's Start a Conversation
+            </h2>
+            
+            <p className={`text-lg mb-12 ${
+              isDarkMode ? 'text-gray-300' : 'text-gray-600'
+            }`}>
+              Whether you're looking to automate your control functions, enhance your 
+              compliance processes, or optimize your project management, our team is 
+              here to help.
+            </p>
+
+            {/* Contact Details */}
+            <div className="space-y-8">
+              <div className="flex items-start space-x-4">
+                <div className="flex-shrink-0">
+                  <Mail className="w-6 h-6 text-red-500 mt-1" />
                 </div>
-                <h3 className={`font-semibold mb-3 ${
-                  isDarkMode ? 'text-white' : ''
-                }`} style={{color: isDarkMode ? 'white' : '#2D1B69'}}>
-                  {info.title}
-                </h3>
-                {info.details.map((detail, detailIndex) => (
-                  <p key={detailIndex} className={`mb-1 ${
-                    isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                <div>
+                  <h3 className={`font-semibold mb-1 ${
+                    isDarkMode ? 'text-white' : 'text-gray-900'
                   }`}>
-                    {detail}
+                    Email Us
+                  </h3>
+                  <p className={`${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                    hello@bruv.co.ke
                   </p>
-                ))}
-                <p className={`text-sm mt-2 ${
-                  isDarkMode ? 'text-gray-400' : 'text-gray-500'
-                }`}>
-                  {info.action}
-                </p>
+                </div>
               </div>
-            ))}
+
+              <div className="flex items-start space-x-4">
+                <div className="flex-shrink-0">
+                  <Phone className="w-6 h-6 text-red-500 mt-1" />
+                </div>
+                <div>
+                  <h3 className={`font-semibold mb-1 ${
+                    isDarkMode ? 'text-white' : 'text-gray-900'
+                  }`}>
+                    Call Us
+                  </h3>
+                  <p className={`${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                    +254 (0) 700 000 000
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start space-x-4">
+                <div className="flex-shrink-0">
+                  <MapPin className="w-6 h-6 text-red-500 mt-1" />
+                </div>
+                <div>
+                  <h3 className={`font-semibold mb-1 ${
+                    isDarkMode ? 'text-white' : 'text-gray-900'
+                  }`}>
+                    Visit Us
+                  </h3>
+                  <p className={`${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                    Nairobi, Kenya<br />
+                    East Africa
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start space-x-4">
+                <div className="flex-shrink-0">
+                  <Clock className="w-6 h-6 text-red-500 mt-1" />
+                </div>
+                <div>
+                  <h3 className={`font-semibold mb-1 ${
+                    isDarkMode ? 'text-white' : 'text-gray-900'
+                  }`}>
+                    Business Hours
+                  </h3>
+                  <p className={`${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                    Monday - Friday: 8:00 AM - 6:00 PM EAT<br />
+                    Weekend: By appointment
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Response Time */}
+            <div className={`mt-12 p-6 rounded-lg ${
+              isDarkMode ? 'bg-gray-800' : 'bg-blue-50'
+            }`}>
+              <h3 className={`font-semibold mb-2 ${
+                isDarkMode ? 'text-white' : 'text-gray-900'
+              }`}>
+                Quick Response Guarantee
+              </h3>
+              <p className={`${
+                isDarkMode ? 'text-gray-300' : 'text-gray-600'
+              }`}>
+                We typically respond to all inquiries within 24 hours. For urgent 
+                matters, please call us directly.
+              </p>
+            </div>
           </div>
 
-          {/* Main Contact Form and Info */}
-          <div className="grid lg:grid-cols-3 gap-12">
-            {/* Contact Form */}
-            <div className="lg:col-span-2">
-              <div className={`rounded-xl p-8 ${
-                isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'
-              } border shadow-lg`}>
-                <h2 className={`text-2xl font-bold mb-6 ${
-                  isDarkMode ? 'text-white' : ''
-                }`} style={{color: isDarkMode ? 'white' : '#2D1B69'}}>
-                  Send us a Message
-                </h2>
+          {/* Contact Form */}
+          <div className={`${
+            isDarkMode ? 'bg-gray-800' : 'bg-white'
+          } rounded-xl shadow-xl p-8`}>
+            <h3 className={`text-2xl font-bold mb-8 ${
+              isDarkMode ? 'text-white' : 'text-gray-900'
+            }`}>
+              Send us a Message
+            </h3>
 
-                {/* Error Message */}
-                {formState.error && (
-                  <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start">
-                    <AlertCircle className="w-5 h-5 text-red-500 mr-3 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <p className="text-red-700 text-sm font-medium">Error sending message</p>
-                      <p className="text-red-600 text-sm">{formState.error}</p>
-                    </div>
-                  </div>
-                )}
-                
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <div>
-                      <label className={`block text-sm font-medium mb-2 ${
-                        isDarkMode ? 'text-gray-300' : 'text-gray-700'
-                      }`}>
-                        First Name *
-                      </label>
-                      <input 
-                        type="text" 
-                        name="firstName"
-                        value={formData.firstName}
-                        onChange={handleChange}
-                        disabled={formState.isSubmitting}
-                        className={`w-full px-4 py-3 border rounded-lg transition-colors duration-200 ${
-                          isDarkMode 
-                            ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-red-500 focus:ring-red-500/20' 
-                            : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-red-500 focus:ring-red-500/20'
-                        } focus:ring-2 focus:outline-none disabled:opacity-50`}
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className={`block text-sm font-medium mb-2 ${
-                        isDarkMode ? 'text-gray-300' : 'text-gray-700'
-                      }`}>
-                        Last Name *
-                      </label>
-                      <input 
-                        type="text" 
-                        name="lastName"
-                        value={formData.lastName}
-                        onChange={handleChange}
-                        disabled={formState.isSubmitting}
-                        className={`w-full px-4 py-3 border rounded-lg transition-colors duration-200 ${
-                          isDarkMode 
-                            ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-red-500 focus:ring-red-500/20' 
-                            : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-red-500 focus:ring-red-500/20'
-                        } focus:ring-2 focus:outline-none disabled:opacity-50`}
-                        required
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <div>
-                      <label className={`block text-sm font-medium mb-2 ${
-                        isDarkMode ? 'text-gray-300' : 'text-gray-700'
-                      }`}>
-                        Email *
-                      </label>
-                      <input 
-                        type="email" 
-                        name="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        disabled={formState.isSubmitting}
-                        className={`w-full px-4 py-3 border rounded-lg transition-colors duration-200 ${
-                          isDarkMode 
-                            ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-red-500 focus:ring-red-500/20' 
-                            : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-red-500 focus:ring-red-500/20'
-                        } focus:ring-2 focus:outline-none disabled:opacity-50`}
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className={`block text-sm font-medium mb-2 ${
-                        isDarkMode ? 'text-gray-300' : 'text-gray-700'
-                      }`}>
-                        Phone
-                      </label>
-                      <input 
-                        type="tel" 
-                        name="phone"
-                        value={formData.phone}
-                        onChange={handleChange}
-                        disabled={formState.isSubmitting}
-                        placeholder="+254 7XX XXX XXX"
-                        className={`w-full px-4 py-3 border rounded-lg transition-colors duration-200 ${
-                          isDarkMode 
-                            ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-red-500 focus:ring-red-500/20' 
-                            : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-red-500 focus:ring-red-500/20'
-                        } focus:ring-2 focus:outline-none disabled:opacity-50`}
-                      />
-                    </div>
-                  </div>
+            {/* Error Message */}
+            {formState.error && (
+              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start space-x-3">
+                <AlertCircle className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="text-red-700 font-medium">Error</p>
+                  <p className="text-red-600 text-sm">{formState.error}</p>
+                </div>
+              </div>
+            )}
 
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <div>
-                      <label className={`block text-sm font-medium mb-2 ${
-                        isDarkMode ? 'text-gray-300' : 'text-gray-700'
-                      }`}>
-                        Company
-                      </label>
-                      <input 
-                        type="text" 
-                        name="company"
-                        value={formData.company}
-                        onChange={handleChange}
-                        disabled={formState.isSubmitting}
-                        className={`w-full px-4 py-3 border rounded-lg transition-colors duration-200 ${
-                          isDarkMode 
-                            ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-red-500 focus:ring-red-500/20' 
-                            : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-red-500 focus:ring-red-500/20'
-                        } focus:ring-2 focus:outline-none disabled:opacity-50`}
-                      />
-                    </div>
-                    <div>
-                      <label className={`block text-sm font-medium mb-2 ${
-                        isDarkMode ? 'text-gray-300' : 'text-gray-700'
-                      }`}>
-                        Service Interest
-                      </label>
-                      <select 
-                        name="serviceInterest"
-                        value={formData.serviceInterest}
-                        onChange={handleChange}
-                        disabled={formState.isSubmitting}
-                        className={`w-full px-4 py-3 border rounded-lg transition-colors duration-200 ${
-                          isDarkMode 
-                            ? 'bg-gray-700 border-gray-600 text-white focus:border-red-500 focus:ring-red-500/20' 
-                            : 'bg-white border-gray-300 text-gray-900 focus:border-red-500 focus:ring-red-500/20'
-                        } focus:ring-2 focus:outline-none disabled:opacity-50`}
-                      >
-                        <option value="">Select a service...</option>
-                        {serviceOptions.map((service, index) => (
-                          <option key={index} value={service}>{service}</option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <label className={`block text-sm font-medium mb-2 ${
-                      isDarkMode ? 'text-gray-300' : 'text-gray-700'
-                    }`}>
-                      Subject *
-                    </label>
-                    <input 
-                      type="text" 
-                      name="subject"
-                      value={formData.subject}
-                      onChange={handleChange}
-                      disabled={formState.isSubmitting}
-                      className={`w-full px-4 py-3 border rounded-lg transition-colors duration-200 ${
-                        isDarkMode 
-                          ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-red-500 focus:ring-red-500/20' 
-                          : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-red-500 focus:ring-red-500/20'
-                      } focus:ring-2 focus:outline-none disabled:opacity-50`}
-                      required
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className={`block text-sm font-medium mb-2 ${
-                      isDarkMode ? 'text-gray-300' : 'text-gray-700'
-                    }`}>
-                      Message *
-                    </label>
-                    <textarea 
-                      rows="6" 
-                      name="message"
-                      value={formData.message}
-                      onChange={handleChange}
-                      disabled={formState.isSubmitting}
-                      className={`w-full px-4 py-3 border rounded-lg transition-colors duration-200 ${
-                        isDarkMode 
-                          ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-red-500 focus:ring-red-500/20' 
-                          : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-red-500 focus:ring-red-500/20'
-                      } focus:ring-2 focus:outline-none disabled:opacity-50`}
-                      required
-                    ></textarea>
-                  </div>
-                  
-                  <button 
-                    type="submit" 
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Name Fields */}
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <label className={`block text-sm font-medium mb-2 ${
+                    isDarkMode ? 'text-gray-300' : 'text-gray-700'
+                  }`}>
+                    First Name *
+                  </label>
+                  <input 
+                    type="text" 
+                    name="firstName"
+                    value={formData.firstName}
+                    onChange={handleChange}
                     disabled={formState.isSubmitting}
-                    className="w-full bg-red-500 hover:bg-red-600 disabled:bg-red-300 text-white font-medium py-3 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl inline-flex items-center justify-center disabled:cursor-not-allowed"
+                    className={`w-full px-4 py-3 border rounded-lg transition-colors duration-200 ${
+                      isDarkMode 
+                        ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-red-500 focus:ring-red-500/20' 
+                        : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-red-500 focus:ring-red-500/20'
+                    } focus:ring-2 focus:outline-none disabled:opacity-50`}
+                    required
+                  />
+                </div>
+                <div>
+                  <label className={`block text-sm font-medium mb-2 ${
+                    isDarkMode ? 'text-gray-300' : 'text-gray-700'
+                  }`}>
+                    Last Name *
+                  </label>
+                  <input 
+                    type="text" 
+                    name="lastName"
+                    value={formData.lastName}
+                    onChange={handleChange}
+                    disabled={formState.isSubmitting}
+                    className={`w-full px-4 py-3 border rounded-lg transition-colors duration-200 ${
+                      isDarkMode 
+                        ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-red-500 focus:ring-red-500/20' 
+                        : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-red-500 focus:ring-red-500/20'
+                    } focus:ring-2 focus:outline-none disabled:opacity-50`}
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Email and Phone */}
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <label className={`block text-sm font-medium mb-2 ${
+                    isDarkMode ? 'text-gray-300' : 'text-gray-700'
+                  }`}>
+                    Email *
+                  </label>
+                  <input 
+                    type="email" 
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    disabled={formState.isSubmitting}
+                    className={`w-full px-4 py-3 border rounded-lg transition-colors duration-200 ${
+                      isDarkMode 
+                        ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-red-500 focus:ring-red-500/20' 
+                        : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-red-500 focus:ring-red-500/20'
+                    } focus:ring-2 focus:outline-none disabled:opacity-50`}
+                    required
+                  />
+                </div>
+                <div>
+                  <label className={`block text-sm font-medium mb-2 ${
+                    isDarkMode ? 'text-gray-300' : 'text-gray-700'
+                  }`}>
+                    Phone
+                  </label>
+                  <input 
+                    type="tel" 
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    disabled={formState.isSubmitting}
+                    placeholder="+254 7XX XXX XXX"
+                    className={`w-full px-4 py-3 border rounded-lg transition-colors duration-200 ${
+                      isDarkMode 
+                        ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-red-500 focus:ring-red-500/20' 
+                        : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-red-500 focus:ring-red-500/20'
+                    } focus:ring-2 focus:outline-none disabled:opacity-50`}
+                  />
+                </div>
+              </div>
+
+              {/* Company and Service Interest */}
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <label className={`block text-sm font-medium mb-2 ${
+                    isDarkMode ? 'text-gray-300' : 'text-gray-700'
+                  }`}>
+                    Company
+                  </label>
+                  <input 
+                    type="text" 
+                    name="company"
+                    value={formData.company}
+                    onChange={handleChange}
+                    disabled={formState.isSubmitting}
+                    className={`w-full px-4 py-3 border rounded-lg transition-colors duration-200 ${
+                      isDarkMode 
+                        ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-red-500 focus:ring-red-500/20' 
+                        : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-red-500 focus:ring-red-500/20'
+                    } focus:ring-2 focus:outline-none disabled:opacity-50`}
+                  />
+                </div>
+                <div>
+                  <label className={`block text-sm font-medium mb-2 ${
+                    isDarkMode ? 'text-gray-300' : 'text-gray-700'
+                  }`}>
+                    Service Interest
+                  </label>
+                  <select 
+                    name="serviceInterest"
+                    value={formData.serviceInterest}
+                    onChange={handleChange}
+                    disabled={formState.isSubmitting}
+                    className={`w-full px-4 py-3 border rounded-lg transition-colors duration-200 ${
+                      isDarkMode 
+                        ? 'bg-gray-700 border-gray-600 text-white focus:border-red-500 focus:ring-red-500/20' 
+                        : 'bg-white border-gray-300 text-gray-900 focus:border-red-500 focus:ring-red-500/20'
+                    } focus:ring-2 focus:outline-none disabled:opacity-50`}
                   >
-                    {formState.isSubmitting ? (
-                      <>
-                        <Loader className="mr-2 w-5 h-5 animate-spin" />
-                        Sending Message...
-                      </>
-                    ) : (
-                      <>
-                        <Send className="mr-2 w-5 h-5" />
-                        Send Message
-                      </>
-                    )}
-                  </button>
-                </form>
+                    <option value="">Select a service</option>
+                    <option value="Project Management Software">Project Management Software</option>
+                    <option value="Audit Management Software">Audit Management Software</option>
+                    <option value="Risk & Compliance Software">Risk & Compliance Software</option>
+                    <option value="Project Management Services">Project Management Services</option>
+                    <option value="Information Systems Audit">Information Systems Audit</option>
+                    <option value="Quality Assurance Services">Quality Assurance Services</option>
+                    <option value="Risk & Compliance Advisory">Risk & Compliance Advisory</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
               </div>
-            </div>
 
-            {/* Office Location and Info */}
-            <div>
-              <h2 className={`text-2xl font-bold mb-6 ${
-                isDarkMode ? 'text-white' : ''
-              }`} style={{color: isDarkMode ? 'white' : '#2D1B69'}}>
-                Our Office
-              </h2>
-              
-              <div className={`p-6 rounded-xl ${
-                isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-100'
-              } border mb-8`}>
-                <h3 className={`font-semibold mb-3 ${
-                  isDarkMode ? 'text-white' : ''
-                }`} style={{color: isDarkMode ? 'white' : '#2D1B69'}}>
-                  {office.city} Headquarters
-                </h3>
-                <div className={`space-y-2 text-sm ${
-                  isDarkMode ? 'text-gray-400' : 'text-gray-600'
+              {/* Subject */}
+              <div>
+                <label className={`block text-sm font-medium mb-2 ${
+                  isDarkMode ? 'text-gray-300' : 'text-gray-700'
                 }`}>
-                  <p>{office.address}</p>
-                  <p>{office.county}, {office.country}</p>
-                  <p>{office.phone}</p>
-                  <p>{office.email}</p>
-                </div>
+                  Subject *
+                </label>
+                <input 
+                  type="text" 
+                  name="subject"
+                  value={formData.subject}
+                  onChange={handleChange}
+                  disabled={formState.isSubmitting}
+                  placeholder="How can we help you?"
+                  className={`w-full px-4 py-3 border rounded-lg transition-colors duration-200 ${
+                    isDarkMode 
+                      ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-red-500 focus:ring-red-500/20' 
+                      : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-red-500 focus:ring-red-500/20'
+                  } focus:ring-2 focus:outline-none disabled:opacity-50`}
+                  required
+                />
               </div>
 
-              {/* Quick Info Section */}
-              <div className="mt-8">
-                <h3 className={`text-lg font-semibold mb-4 ${
-                  isDarkMode ? 'text-white' : ''
-                }`} style={{color: isDarkMode ? 'white' : '#2D1B69'}}>
-                  Quick Information
-                </h3>
-                <div className={`p-4 rounded-lg ${
-                  isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-100'
-                } border`}>
-                  <p className={`text-sm mb-2 ${
-                    isDarkMode ? 'text-gray-300' : 'text-gray-700'
-                  }`}>
-                    <strong>Response Time:</strong> We typically respond within 2-4 business hours.
-                  </p>
-                  <p className={`text-sm mb-2 ${
-                    isDarkMode ? 'text-gray-300' : 'text-gray-700'
-                  }`}>
-                    <strong>Languages:</strong> English, Kiswahili
-                  </p>
-                  <p className={`text-sm ${
-                    isDarkMode ? 'text-gray-300' : 'text-gray-700'
-                  }`}>
-                    <strong>Emergency Support:</strong> Call +254 701 234 567 for urgent issues.
-                  </p>
-                </div>
+              {/* Message */}
+              <div>
+                <label className={`block text-sm font-medium mb-2 ${
+                  isDarkMode ? 'text-gray-300' : 'text-gray-700'
+                }`}>
+                  Message *
+                </label>
+                <textarea 
+                  rows="5" 
+                  name="message"
+                  value={formData.message}
+                  onChange={handleChange}
+                  disabled={formState.isSubmitting}
+                  placeholder="Tell us about your project or requirements..."
+                  className={`w-full px-4 py-3 border rounded-lg transition-colors duration-200 resize-none ${
+                    isDarkMode 
+                      ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-red-500 focus:ring-red-500/20' 
+                      : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-red-500 focus:ring-red-500/20'
+                  } focus:ring-2 focus:outline-none disabled:opacity-50`}
+                  required
+                ></textarea>
               </div>
 
-              {/* Local Information */}
-              <div className="mt-8">
-                <h3 className={`text-lg font-semibold mb-4 ${
-                  isDarkMode ? 'text-white' : ''
-                }`} style={{color: isDarkMode ? 'white' : '#2D1B69'}}>
-                  Local Expertise
-                </h3>
-                <div className={`p-4 rounded-lg ${
-                  isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-100'
-                } border`}>
-                  <p className={`text-sm ${
-                    isDarkMode ? 'text-gray-300' : 'text-gray-700'
-                  }`}>
-                    We understand the Kenyan business environment and regulatory landscape. 
-                    Our solutions are tailored to meet local compliance requirements while 
-                    maintaining international standards.
-                  </p>
-                </div>
-              </div>
-            </div>
+              {/* Submit Button */}
+              <button 
+                type="submit" 
+                disabled={formState.isSubmitting}
+                className="w-full bg-red-500 hover:bg-red-600 disabled:bg-gray-400 text-white font-medium py-4 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl disabled:cursor-not-allowed disabled:shadow-none flex items-center justify-center space-x-2"
+              >
+                {formState.isSubmitting ? (
+                  <>
+                    <Loader className="w-5 h-5 animate-spin" />
+                    <span>Sending...</span>
+                  </>
+                ) : (
+                  <>
+                    <Send className="w-5 h-5" />
+                    <span>Send Message</span>
+                  </>
+                )}
+              </button>
+
+              {/* Form Note */}
+              <p className={`text-sm text-center ${
+                isDarkMode ? 'text-gray-400' : 'text-gray-500'
+              }`}>
+                * Required fields. We respect your privacy and will never share your information.
+              </p>
+            </form>
           </div>
         </div>
-      </section>
+      </div>
     </div>
   );
 };

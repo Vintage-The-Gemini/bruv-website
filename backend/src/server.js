@@ -12,14 +12,14 @@ require('dotenv').config();
 const contactRoutes = require('./routes/contact');
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 10000;
 
 // Security middleware
 app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" }
 }));
 
-// CORS configuration
+// CORS configuration - UPDATED FOR PRODUCTION
 app.use(cors({
   origin: [
     process.env.FRONTEND_URL,
@@ -51,7 +51,8 @@ app.get('/health', (req, res) => {
     status: 'OK',
     message: 'Bruv API is running successfully',
     timestamp: new Date().toISOString(),
-    version: '1.0.0'
+    version: '1.0.0',
+    environment: process.env.NODE_ENV || 'development'
   });
 });
 
@@ -64,9 +65,11 @@ app.get('/', (req, res) => {
     message: 'Welcome to Bruv API',
     version: '1.0.0',
     status: 'running',
+    environment: process.env.NODE_ENV || 'development',
     endpoints: {
       health: '/health',
-      contact: '/api/contact'
+      contact: '/api/contact',
+      contactStatus: '/api/contact/status'
     }
   });
 });
@@ -76,10 +79,12 @@ app.use('*', (req, res) => {
   res.status(404).json({
     success: false,
     message: 'Endpoint not found',
+    requestedPath: req.originalUrl,
     availableEndpoints: [
       'GET /',
       'GET /health',
-      'POST /api/contact'
+      'POST /api/contact',
+      'GET /api/contact/status'
     ]
   });
 });
@@ -98,11 +103,12 @@ app.use((error, req, res, next) => {
 });
 
 // Start server
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Bruv API server running on port ${PORT}`);
   console.log(`📧 Email service configured for: ${process.env.SMTP_USER || 'Not configured'}`);
   console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🔗 Health check: http://localhost:${PORT}/health`);
+  console.log(`🎯 Frontend URL: ${process.env.FRONTEND_URL || 'Not configured'}`);
 });
 
 // Graceful shutdown

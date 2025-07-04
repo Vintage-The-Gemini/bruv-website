@@ -1,86 +1,64 @@
 // FILE PATH: backend/src/middleware/validation.js
-// Validation and sanitization middleware for contact form
+// Request validation and sanitization middleware
 
 const validator = require('validator');
 
 // Validate contact form data
 const validateContactForm = (req, res, next) => {
-  const { firstName, lastName, email, subject, message, phone, company, serviceInterest } = req.body;
+  const { firstName, lastName, email, subject, message } = req.body;
   const errors = [];
 
   // Required field validation
-  if (!firstName || firstName.trim().length < 2) {
-    errors.push('First name must be at least 2 characters long');
+  if (!firstName || firstName.trim().length === 0) {
+    errors.push('First name is required');
+  }
+  if (!lastName || lastName.trim().length === 0) {
+    errors.push('Last name is required');
+  }
+  if (!email || email.trim().length === 0) {
+    errors.push('Email is required');
+  }
+  if (!subject || subject.trim().length === 0) {
+    errors.push('Subject is required');
+  }
+  if (!message || message.trim().length === 0) {
+    errors.push('Message is required');
   }
 
-  if (!lastName || lastName.trim().length < 2) {
-    errors.push('Last name must be at least 2 characters long');
-  }
-
-  if (!email || !validator.isEmail(email)) {
-    errors.push('Valid email address is required');
-  }
-
-  if (!subject || subject.trim().length < 5) {
-    errors.push('Subject must be at least 5 characters long');
-  }
-
-  if (!message || message.trim().length < 10) {
-    errors.push('Message must be at least 10 characters long');
-  }
-
-  // Optional field validation
-  if (phone && !validator.isMobilePhone(phone, 'any', { strictMode: false })) {
-    errors.push('Please provide a valid phone number');
-  }
-
-  // Length limits
+  // Field length validation
   if (firstName && firstName.length > 50) {
     errors.push('First name must be less than 50 characters');
   }
-
   if (lastName && lastName.length > 50) {
     errors.push('Last name must be less than 50 characters');
   }
-
   if (subject && subject.length > 200) {
     errors.push('Subject must be less than 200 characters');
   }
-
   if (message && message.length > 2000) {
     errors.push('Message must be less than 2000 characters');
   }
 
-  if (company && company.length > 100) {
-    errors.push('Company name must be less than 100 characters');
+  // Email validation
+  if (email && !validator.isEmail(email)) {
+    errors.push('Please provide a valid email address');
   }
 
-  // Valid service interest options
-  const validServices = [
-    'Project Management Services',
-    'Information Systems Audit',
-    'Quality Assurance Services', 
-    'Risk & Compliance Advisory',
-    'Project Management Software',
-    'Internal Audit Management Software',
-    'Risk & Compliance Management Software',
-    'Other',
-    '' // Allow empty
-  ];
-
-  if (serviceInterest && !validServices.includes(serviceInterest)) {
-    errors.push('Invalid service interest selected');
+  // Phone validation (if provided)
+  if (req.body.phone && req.body.phone.trim() !== '') {
+    const phone = req.body.phone.replace(/\s+/g, '');
+    if (!validator.isMobilePhone(phone, 'any')) {
+      errors.push('Please provide a valid phone number');
+    }
   }
 
-  // Check for suspicious content (basic spam protection)
+  // Content validation - check for suspicious patterns
   const suspiciousPatterns = [
-    /\b(viagra|cialis|casino|lottery|bitcoin|crypto)\b/i,
-    /\b(click here|urgent|winner|congratulations)\b/i,
     /<script[^>]*>.*?<\/script>/gi,
     /<iframe[^>]*>.*?<\/iframe>/gi
   ];
 
-  const fullText = `${firstName} ${lastName} ${email} ${subject} ${message} ${company}`.toLowerCase();
+  const fullText = `${firstName} ${lastName} ${email} ${subject} ${message} ${req.body.company || ''}`.toLowerCase();
   
   for (const pattern of suspiciousPatterns) {
     if (pattern.test(fullText)) {
@@ -135,55 +113,12 @@ const sanitizeContactData = (req, res, next) => {
     return res.status(500).json({
       success: false,
       message: 'Data processing error',
-      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal error'
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
     });
   }
 };
 
-// Validate email configuration
-const validateEmailConfig = () => {
-  const requiredEnvVars = [
-    'SMTP_HOST',
-    'SMTP_USER', 
-    'SMTP_PASS',
-    'COMPANY_EMAIL'
-  ];
-
-  const missing = requiredEnvVars.filter(varName => !process.env[varName]);
-  
-  if (missing.length > 0) {
-    console.error('❌ Missing email configuration:', missing);
-    return {
-      valid: false,
-      missing: missing,
-      message: `Missing required environment variables: ${missing.join(', ')}`
-    };
-  }
-
-  // Validate email format
-  if (!validator.isEmail(process.env.SMTP_USER)) {
-    return {
-      valid: false,
-      message: 'SMTP_USER must be a valid email address'
-    };
-  }
-
-  if (!validator.isEmail(process.env.COMPANY_EMAIL)) {
-    return {
-      valid: false,
-      message: 'COMPANY_EMAIL must be a valid email address'
-    };
-  }
-
-  console.log('✅ Email configuration validated');
-  return {
-    valid: true,
-    message: 'Email configuration is valid'
-  };
-};
-
 module.exports = {
   validateContactForm,
-  sanitizeContactData,
-  validateEmailConfig
+  sanitizeContactData
 };
