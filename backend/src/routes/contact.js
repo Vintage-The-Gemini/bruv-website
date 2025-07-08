@@ -1,10 +1,10 @@
 // FILE PATH: backend/src/routes/contact.js
-// Complete contact form routes with enhanced error handling, debugging, and domain email support
+// Complete contact form routes with enhanced error handling, debugging, and Resend/SMTP dual support
 
 const express = require("express");
 const rateLimit = require("express-rate-limit");
 const nodemailer = require("nodemailer");
-const { sendContactEmail } = require("../controllers/emailController");
+const { sendContactEmail, testEmailConnection } = require("../controllers/emailController");
 const {
   validateContactForm,
   sanitizeContactData,
@@ -44,18 +44,22 @@ router.post(
       
       const contactData = req.sanitizedData;
 
-      // Validate environment variables
-      if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
-        console.error("❌ SMTP environment variables not configured");
-        console.error("Missing:", {
-          SMTP_HOST: !process.env.SMTP_HOST,
-          SMTP_USER: !process.env.SMTP_USER,
-          SMTP_PASS: !process.env.SMTP_PASS
-        });
+      // Check if any email service is configured
+      const hasResend = !!process.env.RESEND_API_KEY;
+      const hasSMTP = !!(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
+      
+      console.log("🔧 Email service check:", {
+        hasResend,
+        hasSMTP,
+        environment: process.env.NODE_ENV
+      });
+
+      if (!hasResend && !hasSMTP) {
+        console.error("❌ No email service configured");
         return res.status(500).json({
           success: false,
           message: "Email service not configured. Please contact support directly.",
-          error: process.env.NODE_ENV === "development" ? "SMTP credentials missing" : undefined,
+          error: process.env.NODE_ENV === "development" ? "No email service configured - need RESEND_API_KEY or SMTP credentials" : undefined,
         });
       }
 
@@ -70,6 +74,7 @@ router.post(
 
       console.log(`📧 Processing contact form from: ${contactData.email}`);
       console.log(`📝 Subject: ${contactData.subject}`);
+      console.log(`🎯 Will use: ${hasResend ? 'Resend API' : 'SMTP'}`);
 
       // Send email with detailed error catching
       let emailResult;
@@ -91,13 +96,15 @@ router.post(
       }
 
       if (emailResult && emailResult.success) {
-        console.log(`✅ Email sent successfully to ${process.env.COMPANY_EMAIL}`);
+        console.log(`✅ Email sent successfully via ${emailResult.service || 'unknown service'}`);
         console.log(`📧 Message ID: ${emailResult.messageId}`);
+        console.log(`📤 Sent to: ${process.env.COMPANY_EMAIL}`);
 
         res.status(200).json({
           success: true,
           message: "Your message has been sent successfully! We'll get back to you within 24 hours.",
           messageId: emailResult.messageId,
+          service: emailResult.service
         });
       } else {
         console.error("❌ Email service returned failure:", emailResult);
@@ -182,19 +189,32 @@ router.get("/test", async (req, res) => {
   }
 });
 
-// GET /api/contact/status - Check email service status
+// GET /api/contact/status - Check email service status (updated for both SMTP and Resend)
 router.get("/status", (req, res) => {
+  const smtpConfigured = !!(
+    process.env.SMTP_HOST &&
+    process.env.SMTP_USER &&
+    process.env.SMTP_PASS
+  );
+  
+  const resendConfigured = !!process.env.RESEND_API_KEY;
+  
   const emailConfig = {
-    configured: !!(
-      process.env.SMTP_HOST &&
-      process.env.SMTP_USER &&
-      process.env.SMTP_PASS
-    ),
-    host: process.env.SMTP_HOST || "Not configured",
-    port: process.env.SMTP_PORT || "Not configured",
-    user: process.env.SMTP_USER || "Not configured",
-    companyEmail: process.env.COMPANY_EMAIL || "Not configured",
-    secure: process.env.SMTP_SECURE || "Not configured"
+    configured: smtpConfigured || resendConfigured,
+    activeService: resendConfigured ? 'Resend API' : (smtpConfigured ? 'SMTP' : 'None'),
+    
+    // SMTP config
+    smtpHost: process.env.SMTP_HOST || "Not configured",
+    smtpPort: process.env.SMTP_PORT || "Not configured", 
+    smtpUser: process.env.SMTP_USER || "Not configured",
+    smtpSecure: process.env.SMTP_SECURE || "Not configured",
+    
+    // Resend config
+    resendApiKey: process.env.RESEND_API_KEY ? "SET" : "Not configured",
+    resendDomain: process.env.RESEND_DOMAIN || "Using test domain (onboarding@resend.dev)",
+    
+    // Common
+    companyEmail: process.env.COMPANY_EMAIL || "Not configured"
   };
 
   res.json({
@@ -207,20 +227,67 @@ router.get("/status", (req, res) => {
   });
 });
 
-// GET /api/contact/debug - Debug production environment (remove in production)
+// GET /api/contact/health - Check email service health (production safe)
+router.get("/health", async (req, res) => {
+  try {
+    console.log('🏥 Email service health check...');
+    
+    // Test the email connection without sending
+    const connectionTest = await testEmailConnection();
+    
+    const healthData = {
+      success: true,
+      message: "Email service health check",
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || "development",
+      emailService: {
+        configured: !!(process.env.RESEND_API_KEY || (process.env.SMTP_HOST && process.env.SMTP_USER)),
+        service: process.env.RESEND_API_KEY ? 'Resend API' : 'SMTP',
+        resendApiKey: process.env.RESEND_API_KEY ? 'SET' : 'NOT SET',
+        resendDomain: process.env.RESEND_DOMAIN || 'Using test domain (onboarding@resend.dev)',
+        companyEmail: process.env.COMPANY_EMAIL ? 'SET' : 'NOT SET',
+        smtpHost: process.env.SMTP_HOST ? 'SET' : 'NOT SET'
+      },
+      connectionTest: connectionTest
+    };
+
+    res.json(healthData);
+    
+  } catch (error) {
+    console.error('❌ Email health check failed:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Email service health check failed',
+      error: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+// GET /api/contact/debug - Debug production environment
 router.get("/debug", (req, res) => {
   res.json({
     success: true,
     message: "Production environment debug info",
     environment: {
       NODE_ENV: process.env.NODE_ENV,
+      
+      // Resend config
+      RESEND_API_KEY: process.env.RESEND_API_KEY ? "SET" : "NOT SET",
+      RESEND_DOMAIN: process.env.RESEND_DOMAIN || "NOT SET (will use test domain)",
+      
+      // SMTP config  
       SMTP_HOST: process.env.SMTP_HOST ? "SET" : "NOT SET",
       SMTP_USER: process.env.SMTP_USER ? "SET" : "NOT SET", 
       SMTP_PASS: process.env.SMTP_PASS ? "SET" : "NOT SET",
       SMTP_PORT: process.env.SMTP_PORT || "NOT SET",
       SMTP_SECURE: process.env.SMTP_SECURE || "NOT SET",
+      
+      // Common
       COMPANY_EMAIL: process.env.COMPANY_EMAIL ? "SET" : "NOT SET"
     },
+    activeService: process.env.RESEND_API_KEY ? 'Resend API' : 
+                   (process.env.SMTP_HOST ? 'SMTP' : 'None'),
     timestamp: new Date().toISOString()
   });
 });
@@ -236,7 +303,8 @@ router.post("/simple-test", (req, res) => {
       message: "Simple test successful - no email sent",
       receivedData: req.body,
       timestamp: new Date().toISOString(),
-      environment: process.env.NODE_ENV
+      environment: process.env.NODE_ENV,
+      emailServiceAvailable: !!(process.env.RESEND_API_KEY || (process.env.SMTP_HOST && process.env.SMTP_USER))
     });
   } catch (error) {
     console.error("❌ Simple test failed:", error);
@@ -248,8 +316,63 @@ router.post("/simple-test", (req, res) => {
   }
 });
 
-// GET /api/contact/smtp-test - Test SMTP configuration with multiple ports
+// GET /api/contact/verify - Verify email configuration (production safe)
+router.get("/verify", (req, res) => {
+  const hasResend = !!process.env.RESEND_API_KEY;
+  const hasSMTP = !!(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
+  
+  const verification = {
+    success: true,
+    message: "Email configuration verification",
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV,
+    configuration: {
+      // Check what's configured
+      hasResendKey: hasResend,
+      hasSmtpConfig: hasSMTP,
+      hasCompanyEmail: !!process.env.COMPANY_EMAIL,
+      
+      // Determine which service will be used
+      activeService: hasResend ? 'Resend API' : (hasSMTP ? 'SMTP' : 'None'),
+      
+      // Show from address that will be used
+      fromAddress: hasResend ? 
+        (process.env.RESEND_DOMAIN ? `contact@${process.env.RESEND_DOMAIN}` : 'onboarding@resend.dev') :
+        (process.env.SMTP_USER || 'Not configured'),
+      
+      // Show destination
+      toAddress: process.env.COMPANY_EMAIL || 'Not configured'
+    },
+    recommendations: []
+  };
+
+  // Add recommendations
+  if (!hasResend && !hasSMTP) {
+    verification.recommendations.push('Configure either RESEND_API_KEY or SMTP settings');
+  }
+  if (!process.env.COMPANY_EMAIL) {
+    verification.recommendations.push('Set COMPANY_EMAIL environment variable');
+  }
+  if (hasResend && !process.env.RESEND_DOMAIN) {
+    verification.recommendations.push('Using test domain onboarding@resend.dev - consider verifying your own domain');
+  }
+  if (process.env.NODE_ENV === 'production' && hasSMTP && !hasResend) {
+    verification.recommendations.push('SMTP may not work on Render - consider using Resend API instead');
+  }
+
+  res.json(verification);
+});
+
+// GET /api/contact/smtp-test - Test SMTP configuration with multiple ports (development only)
 router.get("/smtp-test", async (req, res) => {
+  if (process.env.NODE_ENV === "production") {
+    return res.status(403).json({
+      success: false,
+      message: "SMTP test not available in production - SMTP ports are blocked on Render",
+      recommendation: "Use Resend API for production email sending"
+    });
+  }
+
   try {
     console.log('🧪 Testing SMTP configuration...');
     
@@ -345,61 +468,6 @@ router.get("/smtp-test", async (req, res) => {
       message: 'SMTP test failed',
       error: error.message,
       stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
-    });
-  }
-});
-
-// GET /api/contact/send-test - Send actual test email using current config
-router.get("/send-test", async (req, res) => {
-  if (process.env.NODE_ENV === "production") {
-    return res.status(403).json({
-      success: false,
-      message: "Send test endpoint disabled in production for security",
-    });
-  }
-
-  try {
-    console.log('📧 Sending actual test email...');
-    
-    const testData = {
-      firstName: "SMTP",
-      lastName: "Test",
-      email: "test@example.com",
-      company: "Test Company",
-      phone: "+1234567890",
-      subject: "🧪 SMTP Configuration Test",
-      message: `This is a test email to verify your SMTP configuration is working correctly.
-
-Timestamp: ${new Date().toISOString()}
-Environment: ${process.env.NODE_ENV}
-SMTP Host: ${process.env.SMTP_HOST}
-SMTP Port: ${process.env.SMTP_PORT || 'default'}
-
-If you receive this email, your SMTP configuration is working! 🎉`,
-      serviceInterest: "Testing",
-      fullName: "SMTP Test",
-      timestamp: new Date().toISOString(),
-      userAgent: "SMTP Test Agent",
-      ipAddress: "127.0.0.1"
-    };
-
-    const result = await sendContactEmail(testData);
-
-    res.json({
-      success: result.success,
-      message: result.success ? 
-        `Test email sent successfully to ${process.env.COMPANY_EMAIL}! Check your inbox.` :
-        "Test email failed to send",
-      details: result,
-      sentTo: process.env.COMPANY_EMAIL
-    });
-
-  } catch (error) {
-    console.error('❌ Send test error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to send test email',
-      error: error.message
     });
   }
 });
