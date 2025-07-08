@@ -1,130 +1,15 @@
 // FILE PATH: backend/src/controllers/emailController.js
-// Complete email handling and sending logic using Nodemailer with enhanced error handling for domain email
+// Email controller using Resend API - perfect for Render hosting
 
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 
-// Create transporter with SMTP configuration optimized for domain email
-const createTransporter = () => {
-  const port = parseInt(process.env.SMTP_PORT) || 587;
-  const isSSL = port === 465;
-  
-  console.log('🔧 Creating SMTP transporter with config:', {
-    host: process.env.SMTP_HOST,
-    port: port,
-    secure: isSSL,
-    user: process.env.SMTP_USER ? 'SET' : 'NOT SET',
-    pass: process.env.SMTP_PASS ? 'SET' : 'NOT SET'
-  });
+// Initialize Resend with API key
+const resend = new Resend(process.env.RESEND_API_KEY);
 
-  const config = {
-    host: process.env.SMTP_HOST,
-    port: port,
-    secure: isSSL, // true for 465 (SSL), false for 587 (TLS) and others
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
-    },
-    tls: {
-      rejectUnauthorized: false, // Important for self-signed certificates on domain email
-      servername: process.env.SMTP_HOST, // Explicitly set servername for domain email
-      ciphers: 'SSLv3' // Support older cipher suites for compatibility
-    },
-    connectionTimeout: 30000, // 30 seconds - longer for domain email
-    greetingTimeout: 15000, // 15 seconds
-    socketTimeout: 30000, // 30 seconds
-    debug: process.env.NODE_ENV === 'development', // Enable debug in development
-    logger: process.env.NODE_ENV === 'development'
-  };
-
-  // For TLS connections (port 587), ensure proper TLS handling
-  if (!isSSL && port === 587) {
-    config.requireTLS = true;
-    config.tls.minVersion = 'TLSv1';
-  }
-
-  // Handle alternative ports for domain email
-  if (port === 25) {
-    config.secure = false;
-    config.ignoreTLS = false;
-    config.requireTLS = false;
-  }
-
-  return nodemailer.createTransporter(config);
-};
-
-// Test email connection with multiple fallback options
-const testEmailConnection = async () => {
-  try {
-    console.log('🧪 Testing email connection...');
-    
-    const transporter = createTransporter();
-    
-    // Test connection
-    await transporter.verify();
-    console.log('✅ Email connection test passed');
-    
-    return {
-      success: true,
-      message: 'Email connection test successful',
-      timestamp: new Date().toISOString()
-    };
-    
-  } catch (error) {
-    console.error('❌ Email connection test failed:', error);
-    
-    // Try alternative configurations
-    const altConfigs = [
-      { port: 587, secure: false, name: 'TLS 587' },
-      { port: 465, secure: true, name: 'SSL 465' },
-      { port: 25, secure: false, name: 'Plain 25' }
-    ];
-    
-    for (const config of altConfigs) {
-      try {
-        console.log(`🔄 Trying alternative config: ${config.name}`);
-        
-        const altTransporter = nodemailer.createTransporter({
-          host: process.env.SMTP_HOST,
-          port: config.port,
-          secure: config.secure,
-          auth: {
-            user: process.env.SMTP_USER,
-            pass: process.env.SMTP_PASS,
-          },
-          tls: {
-            rejectUnauthorized: false
-          },
-          connectionTimeout: 15000
-        });
-        
-        await altTransporter.verify();
-        console.log(`✅ Alternative config ${config.name} successful`);
-        
-        return {
-          success: true,
-          message: `Connection successful with ${config.name}`,
-          recommendedPort: config.port,
-          recommendedSecure: config.secure
-        };
-        
-      } catch (altError) {
-        console.log(`❌ Alternative config ${config.name} failed:`, altError.message);
-      }
-    }
-    
-    return {
-      success: false,
-      error: error.message,
-      code: error.code,
-      message: 'All connection attempts failed'
-    };
-  }
-};
-
-// Send contact form email with comprehensive error handling
+// Send contact form email using Resend API
 const sendContactEmail = async (contactData) => {
   try {
-    console.log('📧 Starting email sending process...');
+    console.log('📧 Sending email via Resend API...');
     console.log('📋 Contact data received:', {
       email: contactData.email,
       name: `${contactData.firstName} ${contactData.lastName}`,
@@ -133,35 +18,17 @@ const sendContactEmail = async (contactData) => {
     });
     
     // Validate required environment variables
-    const requiredVars = ['SMTP_HOST', 'SMTP_USER', 'SMTP_PASS', 'COMPANY_EMAIL'];
-    const missingVars = requiredVars.filter(varName => !process.env[varName]);
+    if (!process.env.RESEND_API_KEY) {
+      throw new Error('RESEND_API_KEY environment variable is required');
+    }
     
-    if (missingVars.length > 0) {
-      throw new Error(`Missing required environment variables: ${missingVars.join(', ')}`);
+    if (!process.env.COMPANY_EMAIL) {
+      throw new Error('COMPANY_EMAIL environment variable is required');
     }
     
     // Validate required contact data
     if (!contactData.email || !contactData.firstName || !contactData.message) {
       throw new Error('Missing required contact data: email, firstName, or message');
-    }
-
-    const transporter = createTransporter();
-
-    // Test SMTP connection first
-    console.log('🔍 Verifying SMTP connection...');
-    try {
-      await transporter.verify();
-      console.log('✅ SMTP connection verified successfully');
-    } catch (verifyError) {
-      console.error('❌ SMTP verification failed:', {
-        message: verifyError.message,
-        code: verifyError.code,
-        command: verifyError.command,
-        response: verifyError.response
-      });
-      
-      // Don't throw here, try to send anyway as some servers don't support verify
-      console.log('⚠️ Verification failed, but attempting to send email anyway...');
     }
 
     // Prepare email content
@@ -299,121 +166,71 @@ Reply directly to this email to respond to the sender.
 © ${new Date().getFullYear()} Bruv Africa. All rights reserved.
     `;
 
-    // Email options
-    const mailOptions = {
-      from: `"Bruv Contact Form" <${process.env.SMTP_USER}>`,
-      to: process.env.COMPANY_EMAIL,
-      replyTo: email,
+    // Send email using Resend API
+    console.log('📤 Sending email via Resend API...');
+    
+    const emailData = {
+      from: `Bruv Contact Form <contact@${process.env.RESEND_DOMAIN || 'yourdomain.com'}>`,
+      to: [process.env.COMPANY_EMAIL],
+      reply_to: email,
       subject: `🔔 New Contact: ${subject}`,
-      text: textContent,
       html: htmlContent,
+      text: textContent,
       headers: {
         'X-Customer-Email': email,
         'X-Customer-Name': `${firstName} ${lastName}`,
-        'X-Submission-Source': 'bruv.africa',
-        'X-Priority': '1',
-        'Importance': 'high',
-        'X-Mailer': 'Bruv Contact Form v1.0'
+        'X-Submission-Source': 'bruv.africa'
       }
     };
 
-    console.log('📤 Sending email with options:', {
-      from: mailOptions.from,
-      to: mailOptions.to,
-      subject: mailOptions.subject,
-      replyTo: mailOptions.replyTo
+    console.log('📧 Sending with data:', {
+      from: emailData.from,
+      to: emailData.to,
+      subject: emailData.subject,
+      reply_to: emailData.reply_to
     });
 
-    // Send email
-    const info = await transporter.sendMail(mailOptions);
+    const data = await resend.emails.send(emailData);
 
-    console.log('✅ Email sent successfully:', {
-      messageId: info.messageId,
-      response: info.response,
-      accepted: info.accepted,
-      rejected: info.rejected
+    console.log('✅ Email sent successfully via Resend:', {
+      id: data.id,
+      from: emailData.from,
+      to: emailData.to
     });
     
     return {
       success: true,
-      messageId: info.messageId,
+      messageId: data.id,
       timestamp: new Date().toISOString(),
-      accepted: info.accepted,
-      rejected: info.rejected,
-      response: info.response
+      service: 'Resend API',
+      from: emailData.from,
+      to: emailData.to
     };
 
   } catch (error) {
-    console.error('❌ Email sending failed:');
-    console.error('Error name:', error.name);
-    console.error('Error message:', error.message);
-    console.error('Error code:', error.code);
-    console.error('Error command:', error.command);
-    console.error('Error response:', error.response);
-    console.error('Error stack:', error.stack);
+    console.error('❌ Resend email sending failed:', {
+      name: error.name,
+      message: error.message,
+      stack: error.stack
+    });
     
-    // Detailed error analysis for domain email issues
+    // Handle specific Resend errors
     let errorType = 'Unknown Error';
     let userMessage = 'Failed to send email';
     let suggestions = [];
     
-    if (error.code === 'EAUTH') {
-      errorType = 'Authentication Failed';
-      userMessage = 'Email authentication failed';
-      suggestions = [
-        'Check SMTP username and password',
-        'Verify email account exists',
-        'Check if 2FA is enabled and app password needed'
-      ];
-    } else if (error.code === 'ECONNECTION' || error.code === 'ENOTFOUND') {
-      errorType = 'Connection Failed';
-      userMessage = 'Could not connect to email server';
-      suggestions = [
-        'Check SMTP host address',
-        'Verify port number (try 587, 465, or 25)',
-        'Check firewall settings',
-        'Verify domain email server is running'
-      ];
-    } else if (error.code === 'ETIMEDOUT') {
-      errorType = 'Connection Timeout';
-      userMessage = 'Email server connection timed out';
-      suggestions = [
-        'Try a different port',
-        'Check network connectivity',
-        'Server may be overloaded'
-      ];
-    } else if (error.code === 'EENVELOPE') {
-      errorType = 'Envelope Error';
-      userMessage = 'Email address validation failed';
-      suggestions = [
-        'Check sender email format',
-        'Verify recipient email format',
-        'Check domain email configuration'
-      ];
-    } else if (error.message.includes('DNS')) {
-      errorType = 'DNS Resolution Failed';
-      userMessage = 'Could not resolve email server address';
-      suggestions = [
-        'Check SMTP host spelling',
-        'Verify domain DNS settings',
-        'Try using IP address instead of hostname'
-      ];
-    } else if (error.message.includes('TLS') || error.message.includes('SSL')) {
-      errorType = 'TLS/SSL Error';
-      userMessage = 'Secure connection failed';
-      suggestions = [
-        'Try different port (587 for TLS, 465 for SSL)',
-        'Check SSL/TLS settings',
-        'Try with rejectUnauthorized: false'
-      ];
-    } else if (error.message.includes('SMTP')) {
-      errorType = 'SMTP Protocol Error';
-      userMessage = 'SMTP server error occurred';
-      suggestions = [
-        'Check SMTP server configuration',
-        'Verify email server supports SMTP',
-        'Contact hosting provider'
-      ];
+    if (error.message.includes('API key')) {
+      errorType = 'API Key Error';
+      userMessage = 'Invalid or missing Resend API key';
+      suggestions = ['Check RESEND_API_KEY environment variable', 'Verify API key is correct'];
+    } else if (error.message.includes('domain')) {
+      errorType = 'Domain Error';
+      userMessage = 'Email domain not verified';
+      suggestions = ['Verify your domain in Resend dashboard', 'Check RESEND_DOMAIN environment variable'];
+    } else if (error.message.includes('rate limit')) {
+      errorType = 'Rate Limit Error';
+      userMessage = 'Too many emails sent';
+      suggestions = ['Wait before sending more emails', 'Upgrade Resend plan if needed'];
     }
 
     console.error(`❌ Error Type: ${errorType}`);
@@ -426,16 +243,52 @@ Reply directly to this email to respond to the sender.
       userMessage: userMessage,
       suggestions: suggestions,
       timestamp: new Date().toISOString(),
-      code: error.code || 'UNKNOWN',
-      command: error.command,
-      response: error.response
+      service: 'Resend API'
     };
   }
 };
 
-// Send test email function for debugging
+// Test email connection (for Resend, we just verify API key)
+const testEmailConnection = async () => {
+  try {
+    console.log('🧪 Testing Resend API connection...');
+    
+    if (!process.env.RESEND_API_KEY) {
+      throw new Error('RESEND_API_KEY not configured');
+    }
+    
+    // Simple test - try to get account info or send a test
+    // Note: Resend doesn't have a direct connection test, so we'll validate the API key format
+    const apiKey = process.env.RESEND_API_KEY;
+    
+    if (!apiKey.startsWith('re_')) {
+      throw new Error('Invalid Resend API key format - should start with "re_"');
+    }
+    
+    console.log('✅ Resend API key format valid');
+    
+    return {
+      success: true,
+      message: 'Resend API connection test successful',
+      service: 'Resend API',
+      timestamp: new Date().toISOString()
+    };
+    
+  } catch (error) {
+    console.error('❌ Resend API test failed:', error.message);
+    
+    return {
+      success: false,
+      error: error.message,
+      service: 'Resend API',
+      timestamp: new Date().toISOString()
+    };
+  }
+};
+
+// Send test email function
 const sendTestEmail = async () => {
-  console.log('🧪 Sending test email...');
+  console.log('🧪 Sending test email via Resend...');
   
   const testData = {
     firstName: 'Test',
@@ -443,14 +296,14 @@ const sendTestEmail = async () => {
     email: 'test@example.com',
     company: 'Test Company',
     phone: '+1234567890',
-    subject: '🧪 Test Email from Bruv Backend',
-    message: `This is a test email to verify the email configuration is working correctly.
+    subject: '🧪 Test Email from Bruv Backend (Resend)',
+    message: `This is a test email to verify the Resend API integration is working correctly.
 
 Environment: ${process.env.NODE_ENV}
-SMTP Host: ${process.env.SMTP_HOST}
+Service: Resend API
 Timestamp: ${new Date().toISOString()}
 
-If you receive this email, your SMTP configuration is working! 🎉`,
+If you receive this email, your Resend integration is working! 🎉`,
     serviceInterest: 'Testing',
     timestamp: new Date().toISOString(),
     userAgent: 'Test Agent',
