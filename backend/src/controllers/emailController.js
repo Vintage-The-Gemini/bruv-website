@@ -3,8 +3,18 @@
 
 const { Resend } = require('resend');
 
-// Initialize Resend with API key
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Initialize Resend with API key - handle missing key gracefully
+let resend;
+try {
+  if (process.env.RESEND_API_KEY) {
+    resend = new Resend(process.env.RESEND_API_KEY);
+    console.log('✅ Resend initialized with API key');
+  } else {
+    console.log('⚠️ RESEND_API_KEY not found - email service will not work');
+  }
+} catch (error) {
+  console.error('❌ Failed to initialize Resend:', error.message);
+}
 
 // Send contact form email using Resend API
 const sendContactEmail = async (contactData) => {
@@ -20,6 +30,10 @@ const sendContactEmail = async (contactData) => {
     // Validate required environment variables
     if (!process.env.RESEND_API_KEY) {
       throw new Error('RESEND_API_KEY environment variable is required');
+    }
+    
+    if (!resend) {
+      throw new Error('Resend service not initialized - check API key');
     }
     
     if (!process.env.COMPANY_EMAIL) {
