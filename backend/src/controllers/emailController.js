@@ -129,16 +129,24 @@ const sendViaResend = async (contactData) => {
 
     const data = await resend.emails.send(emailData);
 
-    console.log('📬 Resend API response:', JSON.stringify(data, null, 2));
+    console.log('📬 Resend API Full Response:', JSON.stringify(data, null, 2));
+    console.log('📬 Response type:', typeof data);
+    console.log('📬 Response keys:', Object.keys(data || {}));
 
     // Check if Resend actually sent the email
-    if (!data || (!data.id && !data.data?.id)) {
-      console.error('❌ Resend API failed - no email ID returned');
-      console.error('Full response:', data);
-      throw new Error('Resend API failed to return email ID - email may not have been sent');
+    if (!data) {
+      console.error('❌ Resend API returned null/undefined response');
+      throw new Error('Resend API returned no response');
     }
 
-    const emailId = data.id || data.data?.id;
+    // Handle different response structures from Resend API v4
+    const emailId = data.id || data.data?.id || data.messageId;
+    
+    if (!emailId) {
+      console.error('❌ Resend API failed - no email ID returned');
+      console.error('Full Resend response:', JSON.stringify(data, null, 2));
+      throw new Error(`Resend API failed to return email ID. Response: ${JSON.stringify(data)}`);
+    }
     console.log('✅ Email sent successfully via Resend:', emailId);
 
     return {
@@ -151,7 +159,11 @@ const sendViaResend = async (contactData) => {
     };
 
   } catch (error) {
-    console.error('❌ Resend email sending failed:', error);
+    console.error('❌ Resend email sending failed:');
+    console.error('Error name:', error.name);
+    console.error('Error message:', error.message);
+    console.error('Error stack:', error.stack);
+    console.error('Full error object:', JSON.stringify(error, null, 2));
     
     // Handle specific Resend errors
     let errorType = 'Unknown Error';
@@ -166,6 +178,9 @@ const sendViaResend = async (contactData) => {
     } else if (error.message.includes('rate limit')) {
       errorType = 'Rate Limit Error';
       userMessage = 'Too many emails sent';
+    } else if (error.message.includes('validation_error')) {
+      errorType = 'Validation Error';
+      userMessage = 'Email validation failed';
     }
 
     return {
@@ -174,7 +189,8 @@ const sendViaResend = async (contactData) => {
       errorType: errorType,
       userMessage: userMessage,
       service: 'Resend API',
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      fullError: JSON.stringify(error, Object.getOwnPropertyNames(error))
     };
   }
 };
